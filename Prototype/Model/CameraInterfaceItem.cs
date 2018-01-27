@@ -1,13 +1,13 @@
-﻿namespace Prototype.ViewModel
+﻿namespace Prototype.Model
 {
-    public class CameraItem
+    public class CameraInterfaceItem
     {
-        public CameraItem()
+        public CameraInterfaceItem()
         {
 
         }
 
-        public CameraItem(string name)
+        public CameraInterfaceItem(string name)
         {
             Id = name;
             Name = name;

@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel;
 
-namespace Prototype.ViewModel
+namespace Prototype.Model
 {
     public class FilterItem : INotifyPropertyChanged
     {
-        public int Number { get; set; }
+        public short Number { get; set; }
         public string Name { get; set; }
         public string NewName { get; set; }
 

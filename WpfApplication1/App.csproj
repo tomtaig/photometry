@@ -42,43 +42,43 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ASCOM.Astrometry, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
-      <HintPath>..\packages\ASCOM.Platform.6.3.0\lib\net40\ASCOM.Astrometry.dll</HintPath>
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.Astrometry.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ASCOM.Attributes, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
-      <HintPath>..\packages\ASCOM.Platform.6.3.0\lib\net40\ASCOM.Attributes.dll</HintPath>
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.Attributes.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ASCOM.Controls, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
-      <HintPath>..\packages\ASCOM.Platform.6.3.0\lib\net40\ASCOM.Controls.dll</HintPath>
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.Controls.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ASCOM.DeviceInterfaces, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
-      <HintPath>..\packages\ASCOM.Platform.6.3.0\lib\net40\ASCOM.DeviceInterfaces.dll</HintPath>
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.DeviceInterfaces.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ASCOM.DriverAccess, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
-      <HintPath>..\packages\ASCOM.Platform.6.3.0\lib\net40\ASCOM.DriverAccess.dll</HintPath>
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.DriverAccess.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ASCOM.Exceptions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
-      <HintPath>..\packages\ASCOM.Platform.6.3.0\lib\net40\ASCOM.Exceptions.dll</HintPath>
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.Exceptions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ASCOM.Internal.Extensions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
-      <HintPath>..\packages\ASCOM.Platform.6.3.0\lib\net40\ASCOM.Internal.Extensions.dll</HintPath>
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.Internal.Extensions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ASCOM.SettingsProvider, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
-      <HintPath>..\packages\ASCOM.Platform.6.3.0\lib\net40\ASCOM.SettingsProvider.dll</HintPath>
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.SettingsProvider.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ASCOM.Utilities, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
-      <HintPath>..\packages\ASCOM.Platform.6.3.0\lib\net40\ASCOM.Utilities.dll</HintPath>
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.Utilities.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ASCOM.Utilities.Video, Version=6.1.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
-      <HintPath>..\packages\ASCOM.Platform.6.3.0\lib\net40\ASCOM.Utilities.Video.dll</HintPath>
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.Utilities.Video.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="CSharpFITS_v1.1, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -167,13 +167,9 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
-    <None Include="ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="contributors.txt" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="sample.png">

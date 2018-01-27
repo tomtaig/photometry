@@ -1,4 +1,4 @@
-﻿using Prototype.ViewModel;
+﻿using Prototype.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;

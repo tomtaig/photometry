@@ -4,17 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 
-namespace Prototype.ViewModel
+namespace Prototype.Model
 {
     public class CoolerView : INotifyPropertyChanged
     {
-        Task _monitor;
-        CancellationTokenSource _cancelMonitor;
-
         public CoolerView()
         {            
             TemperatureReadings = new List<DataPoint>();
@@ -46,35 +41,7 @@ namespace Prototype.ViewModel
 
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler ReadingsUpdated;
-
-        void MonitorCooling(CancellationToken token)
-        {
-            var rand = new Random((int)(DateTime.Now.Ticks % int.MaxValue));
-
-            FirstReadingTime = DateTime.Now;
-
-            var readingTime = FirstReadingTime;
-            
-            while (!token.IsCancellationRequested)
-            {
-                LastReadingTime = readingTime;
-
-                var temp = rand.Next(-50, 50);
-                var power = rand.Next(0, 100);
-                
-                TemperatureReadings.Add(new DataPoint(DateTimeAxis.ToDouble(readingTime), temp));                
-                PowerReadings.Add(new DataPoint(DateTimeAxis.ToDouble(readingTime), power));
-
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastPowerReading)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastTemperatureReading)));
-                ReadingsUpdated?.Invoke(this, EventArgs.Empty);
-                
-                Thread.Sleep(1000);
-
-                readingTime = DateTime.Now;
-            }
-        }
-
+        
         public void TurnOn()
         {
             if(IsOn)
@@ -93,6 +60,18 @@ namespace Prototype.ViewModel
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(IsOffVisibility)));
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(IsOnVisibility)));
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(IsOnAndTargetSet)));
+        }
+
+        public void AddReading(DateTime readingTime, double? temperature, double? power)
+        {
+            LastReadingTime = readingTime;
+            
+            TemperatureReadings.Add(new DataPoint(DateTimeAxis.ToDouble(readingTime), temperature ?? double.NaN));
+            PowerReadings.Add(new DataPoint(DateTimeAxis.ToDouble(readingTime), power ?? double.NaN));
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastPowerReading)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastTemperatureReading)));
+            ReadingsUpdated?.Invoke(this, EventArgs.Empty);
         }
 
         public void TurnOff()
@@ -124,19 +103,7 @@ namespace Prototype.ViewModel
             {
                 TurnOff();
             }
-
-            if (_cancelMonitor != null)
-            {
-                _cancelMonitor.Cancel();
-            }
-
-            if (available)
-            {
-                _cancelMonitor = new CancellationTokenSource();
-                _monitor = new Task(() => MonitorCooling(_cancelMonitor.Token), _cancelMonitor.Token);
-                _monitor.Start();
-            }
-
+            
             if(!available)
             {
                 TemperatureReadings.Clear();

@@ -1,4 +1,4 @@
-﻿using Prototype.ViewModel;
+﻿using Prototype.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +37,12 @@ namespace Prototype
         {
             var session = Application.Current.Resources["session"] as Session;
 
-            session.ConnectWheel();
+            var result = session.ConnectWheel();
+
+            if(result.IsError)
+            {
+                MessageBox.Show(result.ErrorMessage, "Connect Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void DisconnectClick(object sender, RoutedEventArgs e)
@@ -65,7 +70,7 @@ namespace Prototype
         {
             var session = Application.Current.Resources["session"] as Session;
 
-            session.Filter.MoveToSelectedSlot();
+            session.MoveFilterWheel();
         }
     }
 }

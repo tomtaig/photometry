@@ -1,16 +1,15 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Prototype.ViewModel
+namespace Prototype.Model
 {
     public class FilterView : INotifyPropertyChanged
     {
-        Task _monitor;
-        CancellationTokenSource _cancelMonitor;
-
         public FilterView()
         {
             Wheels = new ObservableCollection<FilterWheel>();
@@ -76,13 +75,7 @@ namespace Prototype.ViewModel
             SelectedFilter = null;
             ActiveFilter = null;
             IsConnected = true;
-
-            _cancelMonitor = new CancellationTokenSource();
-
-            _monitor = new Task(() => MonitorFilter(_cancelMonitor.Token), _cancelMonitor.Token);
-
-            _monitor.Start();
-
+            
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(Filters)));
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(IsConnected)));
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(ActiveFilter)));
@@ -99,27 +92,10 @@ namespace Prototype.ViewModel
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(IsConnectEnabled)));
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(FilterStatus)));
         }
-
-        void MonitorFilter(CancellationToken token)
+        
+        public void SetActiveFilter(int position)
         {
-            while (!token.IsCancellationRequested)
-            {
-                if (IsFilterWheelMoving)
-                {
-                    Thread.Sleep(2000);
-                    SetFilterWheelMoving(false);
-                    FinishMoving();
-                }
-                else
-                {
-                    Thread.Sleep(100);
-                }
-            }
-        }
-
-        public void FinishMoving()
-        {
-            ActiveFilter = SelectedFilter;
+            ActiveFilter = Filters.First(x => x.Number == position);
             IsFilterWheelMoving = false;
 
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(ActiveFilterName)));
@@ -129,7 +105,7 @@ namespace Prototype.ViewModel
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(ActiveFilterVisibility)));
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(FilterStatus)));
         }
-
+        
         public void SetFilterWheelMoving(bool moving)
         {
             IsFilterWheelMoving = moving;

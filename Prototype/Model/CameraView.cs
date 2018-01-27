@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 
-namespace Prototype.ViewModel
+namespace Prototype.Model
 {
     public class CameraView : INotifyPropertyChanged
     {
@@ -58,20 +58,7 @@ namespace Prototype.ViewModel
         public void ChangeInterface()
         {
             Camera = null;
-
-            switch (Interface?.Id)
-            {
-                case "ASCOM":
-                    LoadAscomCameras();
-                    break;
-                case "ZWO ASI":
-                    LoadZwoCameras();
-                    break;
-                default:
-                    Cameras.Clear();
-                    break;
-            }
-
+            
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(Interface)));
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(IsInterfaceSelected)));
 
@@ -88,20 +75,6 @@ namespace Prototype.ViewModel
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(ZwoVisibility)));
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(CanonVisibility)));
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(NikonVisibility)));
-        }
-
-        private void LoadZwoCameras()
-        {
-            Cameras.Clear();
-            Cameras.Add(new CameraItem("ASI 1600MM-C"));
-            Cameras.Add(new CameraItem("ASI 120MC"));
-        }
-
-        private void LoadAscomCameras()
-        {
-            Cameras.Clear();
-            Cameras.Add(new CameraItem("ASI Camera (1)"));
-            Cameras.Add(new CameraItem("ASI Camera (2)"));
         }
 
         public void ChangeGain(double value)
@@ -164,10 +137,6 @@ namespace Prototype.ViewModel
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(IsInterfaceSelectionEnabled)));
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(IsCameraSelectionEnabled)));
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(CameraSettingsVisibility)));
-        }
-
-        public void OpenAscomSettings()
-        {
         }
     }
 }

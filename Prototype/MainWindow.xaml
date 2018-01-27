@@ -79,7 +79,7 @@
                         </StackPanel>
                     </controls:MainTabHeader>
                 </TabItem.Header>
-                <local:Camera DataContext="{Binding Camera}"></local:Camera>
+                <local:Camera DataContext="{Binding .}"></local:Camera>
             </TabItem>
             <TabItem Template="{StaticResource MainTab}">
                 <TabItem.Header>
@@ -87,12 +87,12 @@
                         <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
                             <Label Padding="0 5 0 5" HorizontalAlignment="Center">Cooler</Label>
                             <StackPanel Orientation="Horizontal" Margin="10 0 10 0" Visibility="{Binding Cooler.CoolerTabInfoVisibility}">
-                                <Label Padding="0" HorizontalAlignment="Left" Width="50">Temp.</Label>
-                                <TextBlock Padding="0" Width="30" TextAlignment="Right" Text="{Binding Cooler.LastTemperatureReading, StringFormat={}{0}c}" />
+                                <Label Padding="0" HorizontalAlignment="Left" Width="45">Temp.</Label>
+                                <TextBlock Padding="0" Width="35" TextAlignment="Right" Text="{Binding Cooler.LastTemperatureReading, StringFormat={}{0:0.0}c}" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="10 0 10 0" Visibility="{Binding Cooler.CoolerTabInfoVisibility}">
                                 <Label Padding="0" HorizontalAlignment="Left" Width="50">Target</Label>
-                                <TextBlock Padding="0" Width="30" TextAlignment="Right" Text="{Binding Cooler.TargetTemperature, StringFormat={}{0}c}" />
+                                <TextBlock Padding="0" Width="30" TextAlignment="Right" Text="{Binding Cooler.TargetTemperature, StringFormat={}{0:0}c}" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="10 0 10 0" Visibility="{Binding Cooler.CoolerTabNotOnVisibility}">
                                 <Label Padding="0" HorizontalContentAlignment="Center" Width="80" Content="{Binding Cooler.Status}"></Label>

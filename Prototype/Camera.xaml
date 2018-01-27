@@ -12,22 +12,22 @@
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Vertical">
                         <Label>Interface:</Label>
-                        <ComboBox ItemsSource="{Binding Interfaces}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedItem="{Binding Interface}" IsEnabled="{Binding IsInterfaceSelectionEnabled}" SelectionChanged="InterfaceSelectionChanged" />
+                        <ComboBox ItemsSource="{Binding Camera.Interfaces}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedItem="{Binding Camera.Interface}" IsEnabled="{Binding Camera.IsInterfaceSelectionEnabled}" SelectionChanged="InterfaceSelectionChanged" />
                     </StackPanel>
                     <StackPanel Orientation="Vertical">
                         <Label>Camera:</Label>
-                        <ComboBox ItemsSource="{Binding Cameras}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedItem="{Binding Camera}" IsEnabled="{Binding IsCameraSelectionEnabled}" SelectionChanged="CameraSelectionChanged" />
+                        <ComboBox ItemsSource="{Binding Camera.Cameras}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedItem="{Binding Camera.Camera}" IsEnabled="{Binding Camera.IsCameraSelectionEnabled}" SelectionChanged="CameraSelectionChanged" />
                     </StackPanel>
-                    <Button Content="Connect" Padding="5" HorizontalAlignment="Right" Margin="0 20 0 0" Visibility="{Binding ConnectVisibility}" IsEnabled="{Binding IsCameraSelected}" Click="ConnectClick" />
-                    <Button Content="Disconnect" Padding="5" HorizontalAlignment="Right" Margin="0 20 0 0" Visibility="{Binding DisconnectVisibility}" Click="DisconnectClick" />
+                    <Button Content="Connect" Padding="5" HorizontalAlignment="Right" Margin="0 20 0 0" Visibility="{Binding Camera.ConnectVisibility}" IsEnabled="{Binding Camera.IsCameraSelected}" Click="ConnectClick" />
+                    <Button Content="Disconnect" Padding="5" HorizontalAlignment="Right" Margin="0 20 0 0" Visibility="{Binding Camera.DisconnectVisibility}" Click="DisconnectClick" />
                 </StackPanel>
             </GroupBox>
 
-            <StackPanel Orientation="Vertical" Visibility="{Binding CameraSettingsVisibility}" Width="300" Margin="10">
-                <GroupBox Visibility="{Binding ZwoVisibility}" Header="ZWO Settings" Padding="10" VerticalAlignment="Top">
+            <StackPanel Orientation="Vertical" Visibility="{Binding Camera.CameraSettingsVisibility}" Width="300" Margin="10">
+                <GroupBox Visibility="{Binding Camera.ZwoVisibility}" Header="ZWO Settings" Padding="10" VerticalAlignment="Top">
                     <local:CameraZwo />
                 </GroupBox>
-                <GroupBox Visibility="{Binding AscomVisibility}" Header="ASCOM Settings" Padding="10" VerticalAlignment="Top">
+                <GroupBox Visibility="{Binding Camera.AscomVisibility}" Header="ASCOM Settings" Padding="10" VerticalAlignment="Top">
                     <local:CameraAscom />
                 </GroupBox>
             </StackPanel>

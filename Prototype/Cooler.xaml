@@ -78,15 +78,15 @@
                 </Grid.ColumnDefinitions>
                 <Label Grid.Row="0" Grid.Column="0" Margin="10 0 0 0" Padding="0">Status</Label>
                 <Label Grid.Row="0" Grid.Column="1" Margin="10 0 0 0" Padding="0" Content="{Binding Cooler.Status}" />
-                <Label Grid.Row="1" Grid.Column="0" Margin="10 0 0 0" Padding="0" Foreground="DarkBlue">Power</Label>
-                <TextBlock Grid.Row="1" Grid.Column="1" Margin="10 0 0 0" Padding="0" Foreground="DarkBlue" Text="{Binding Cooler.LastPowerReading, StringFormat={}{0}%}" Visibility="{Binding Cooler.IsOnVisibility}" />
-                <TextBlock Grid.Row="1" Grid.Column="1" Margin="10 0 0 0" Padding="0" Foreground="DarkBlue" Text="-" Visibility="{Binding IsOffVisibility}" />
-                <Label Grid.Row="2" Grid.Column="0" Margin="10 0 0 0" Padding="0" Foreground="DarkRed">Temp.</Label>
-                <TextBlock Grid.Row="2" Grid.Column="1" Margin="10 0 0 0" Padding="0"  Foreground="DarkRed" Text="{Binding Cooler.LastTemperatureReading, StringFormat={}{0}c}" Visibility="{Binding Camera.IsConnectedVisibility}" />
+                <Label Grid.Row="1" Grid.Column="0" Margin="10 0 0 0" Padding="0" Foreground="DarkRed">Power</Label>
+                <TextBlock Grid.Row="1" Grid.Column="1" Margin="10 0 0 0" Padding="0" Foreground="DarkRed" Text="{Binding Cooler.LastPowerReading, StringFormat={}{0:0.00}%}" Visibility="{Binding Cooler.IsOnVisibility}" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Margin="10 0 0 0" Padding="0" Foreground="DarkRed" Text="-" Visibility="{Binding Cooler.IsOffVisibility}" />
+                <Label Grid.Row="2" Grid.Column="0" Margin="10 0 0 0" Padding="0" Foreground="DarkBlue">Temp.</Label>
+                <TextBlock Grid.Row="2" Grid.Column="1" Margin="10 0 0 0" Padding="0"  Foreground="DarkBlue" Text="{Binding Cooler.LastTemperatureReading, StringFormat={}{0:0.00}c}" Visibility="{Binding Camera.IsConnectedVisibility}" />
             </Grid>
             <oxy:Plot Name="readings" Grid.Column="2" Grid.Row="1">
                 <oxy:Plot.Axes>
-                    <oxy:LinearAxis Name="yAxis" Position="Left" Minimum="-50" Maximum="100" MajorStep="20" MinorStep="10"
+                    <oxy:LinearAxis Name="yAxis" Position="Left" Minimum="-50" Maximum="120" MajorStep="20" MinorStep="10"
                                     MinorGridlineStyle="Dot" MinorGridlineThickness="1" MinorGridlineColor="LightGray"
                                     MajorGridlineColor="LightGray" MajorGridlineThickness="1" MajorGridlineStyle="Dot" />
                     <oxy:DateTimeAxis Name="xAxis" Position="Bottom" MajorTickSize="0" MinorTickSize="0" TickStyle="None" 

@@ -34,6 +34,46 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ASCOM.Astrometry, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.Astrometry.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ASCOM.Attributes, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.Attributes.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ASCOM.Controls, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.Controls.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ASCOM.DeviceInterfaces, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.DeviceInterfaces.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ASCOM.DriverAccess, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.DriverAccess.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ASCOM.Exceptions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.Exceptions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ASCOM.Internal.Extensions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.Internal.Extensions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ASCOM.SettingsProvider, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.SettingsProvider.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ASCOM.Utilities, Version=6.0.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.Utilities.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="ASCOM.Utilities.Video, Version=6.1.0.0, Culture=neutral, PublicKeyToken=565de7938946fba7, processorArchitecture=MSIL">
+      <HintPath>..\packages\ASCOM.Platform.6.3.2\lib\net45\ASCOM.Utilities.Video.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="OxyPlot, Version=1.0.0.0, Culture=neutral, PublicKeyToken=638079a8f0bd61e9, processorArchitecture=MSIL">
       <HintPath>..\packages\OxyPlot.Core.1.0.0\lib\net45\OxyPlot.dll</HintPath>
     </Reference>
@@ -72,14 +112,19 @@
     <Compile Include="Filter.xaml.cs">
       <DependentUpon>Filter.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModel\FilterItem.cs" />
-    <Compile Include="ViewModel\FilterView.cs" />
-    <Compile Include="ViewModel\FilterWheel.cs" />
-    <Compile Include="ViewModel\Session.cs" />
-    <Compile Include="ViewModel\CameraItem.cs" />
-    <Compile Include="ViewModel\CameraInterfaceItem.cs" />
-    <Compile Include="ViewModel\CameraView.cs" />
-    <Compile Include="ViewModel\CoolerView.cs" />
+    <Compile Include="Services\AscomCameraService.cs" />
+    <Compile Include="Services\AscomFilterWheelService.cs" />
+    <Compile Include="Services\Interfaces\ICameraService.cs" />
+    <Compile Include="Model\FilterItem.cs" />
+    <Compile Include="Model\FilterView.cs" />
+    <Compile Include="Model\FilterWheel.cs" />
+    <Compile Include="Model\OperationResult.cs" />
+    <Compile Include="Model\Session.cs" />
+    <Compile Include="Model\CameraItem.cs" />
+    <Compile Include="Model\CameraInterfaceItem.cs" />
+    <Compile Include="Model\CameraView.cs" />
+    <Compile Include="Model\CoolerView.cs" />
+    <Compile Include="Services\Interfaces\IFilterWheelService.cs" />
     <Page Include="Camera.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

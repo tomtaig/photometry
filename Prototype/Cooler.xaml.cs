@@ -1,5 +1,5 @@
 ﻿using OxyPlot.Axes;
-using Prototype.ViewModel;
+using Prototype.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,23 +70,23 @@ namespace Prototype
 
         private void TurnOnClick(object sender, RoutedEventArgs e)
         {
-            var model = (Session)DataContext;
+            var session = (Session)DataContext;
 
-            model.Cooler.TurnOn();
+            session.TurnOnCooler();
         }
 
         private void TurnOffClick(object sender, RoutedEventArgs e)
         {
-            var model = (Session)DataContext;
+            var session = (Session)DataContext;
 
-            model.Cooler.TurnOff();
+            session.TurnOffCooler();
         }
 
         private void TargetTemperatureClick(object sender, RoutedEventArgs e)
         {
-            var model = (Session)DataContext;
+            var session = (Session)DataContext;
 
-            model.Cooler.SetTargetTemperature(targetTemperature.Value);
+            session.SetTargetTemperature(targetTemperature.Value);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Prototype.ViewModel;
+﻿using Prototype.Services;
+using Prototype.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,9 +29,14 @@ namespace Prototype
 
         private void AscomSettingsClick(object sender, RoutedEventArgs e)
         {
-            var model = (CameraView)DataContext;
+            var session = Application.Current.Resources["session"] as Session;
+            var service = (AscomCameraService)session.CameraService;
+            var result = service.OpenSetupDialog();
 
-            model.OpenAscomSettings();
-        }
+            if (result.IsError)
+            {
+                MessageBox.Show(result.ErrorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        } 
     }
 }

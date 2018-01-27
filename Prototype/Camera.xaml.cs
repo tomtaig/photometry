@@ -1,4 +1,4 @@
-﻿using Prototype.ViewModel;
+﻿using Prototype.Model;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -16,30 +16,45 @@ namespace Prototype
 
         private void InterfaceSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var model = (CameraView)DataContext;
+            var session = Application.Current.Resources["session"] as Session;
 
-            model.ChangeInterface();
+            var result = session.SetCameraInterface();
+
+            if (result.IsError)
+            {
+                MessageBox.Show(result.ErrorMessage, "Connect Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void CameraSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var model = (CameraView)DataContext;
+            var session = Application.Current.Resources["session"] as Session;
 
-            model.ChangeCamera();
+            session.Camera.ChangeCamera();
         }
 
         private void ConnectClick(object sender, RoutedEventArgs e)
         {
             var session = Application.Current.Resources["session"] as Session;
 
-            session.ConnectCamera();
+            var result = session.ConnectCamera();
+
+            if(result.IsError)
+            {
+                MessageBox.Show(result.ErrorMessage, "Connect Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void DisconnectClick(object sender, RoutedEventArgs e)
         {
             var session = Application.Current.Resources["session"] as Session;
 
-            session.DisconnectCamera();
+            var result = session.DisconnectCamera();
+            
+            if (result.IsError)
+            {
+                MessageBox.Show(result.ErrorMessage, "Connect Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
