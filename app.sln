@@ -1,15 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2010
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApplication1", "WpfApplication1\WpfApplication1.csproj", "{C8FEB01E-1DA1-4CF0-B515-68D3EA834F5D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "App", "WpfApplication1\App.csproj", "{C8FEB01E-1DA1-4CF0-B515-68D3EA834F5D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{0DBDA976-332C-48B2-B963-2A2AA644F551}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdvancedCameraSimulator", "AdvancedCameraSimulator\AdvancedCameraSimulator.csproj", "{64308775-BD4A-469C-BCAB-3ED830B811AF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoPlayerCamera", "AdvancedCameraSimulator\VideoPlayerCamera.csproj", "{64308775-BD4A-469C-BCAB-3ED830B811AF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Photometry", "Photometry\Photometry.csproj", "{04C2E54F-BF14-45EA-A8C1-987A4DA9703A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prototype", "Prototype\Prototype.csproj", "{2431C550-C36C-4159-B98F-4E9ED3C57658}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,8 +35,15 @@ Global
 		{04C2E54F-BF14-45EA-A8C1-987A4DA9703A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04C2E54F-BF14-45EA-A8C1-987A4DA9703A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04C2E54F-BF14-45EA-A8C1-987A4DA9703A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2431C550-C36C-4159-B98F-4E9ED3C57658}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2431C550-C36C-4159-B98F-4E9ED3C57658}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2431C550-C36C-4159-B98F-4E9ED3C57658}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2431C550-C36C-4159-B98F-4E9ED3C57658}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E298E2AB-62A4-4704-843E-811555C80048}
 	EndGlobalSection
 EndGlobal

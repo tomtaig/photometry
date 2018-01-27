@@ -53,6 +53,36 @@ namespace Tests
             Assert.AreEqual(0.02, actual[0]);
             Assert.AreEqual(0.02, actual[1]);
         }
+        
+        [TestMethod]
+        public void GaussianPeakErrorFunctionCheck()
+        {
+            var actual = new double[]
+            {
+                Photometry.GaussianPeakErrorFunction(35, 90, 7),
+                Photometry.GaussianPeakErrorFunction(35, -20, 7)
+            };
+
+            Assert.AreEqual(4.4096209912536439, actual[0]);
+            Assert.AreEqual(4.4096209912536439, actual[1]);
+        }
+        
+        [TestMethod]
+        public void GaussianPeakErrorFunctionSlopesTowardsAnswer()
+        {
+            var actual = new double[]
+            {
+                Photometry.GaussianPeakErrorSlopeFunction(4.0, 8, 7),
+                Photometry.GaussianPeakErrorSlopeFunction(4.0, 5, 7),
+                Photometry.GaussianPeakErrorSlopeFunction(4.0, 3, 7),
+                Photometry.GaussianPeakErrorSlopeFunction(4.0, 0, 7)
+            };
+
+            Assert.AreEqual(+0.01166, Math.Round(actual[0], 5));
+            Assert.AreEqual(+0.00292, Math.Round(actual[1], 5));
+            Assert.AreEqual(-0.00292, Math.Round(actual[2], 5));
+            Assert.AreEqual(-0.01166, Math.Round(actual[3], 5));
+        }
 
         [TestMethod]
         public void GaussianSigmaFromSampleAmplitudeCheck()
@@ -142,16 +172,16 @@ namespace Tests
         /// </summary>
         /// <param name="x"></param>
         /// <param name="xCenter"></param>
-        /// <param name="amplitude"></param>
+        /// <param name="peak"></param>
         /// <param name="sigmaSample"></param>
         /// <param name="sigmaPrediction"></param>
         /// <returns></returns>
-        double GaussianSigmaErrorSlopeFunction(double x, double xCenter, double amplitude, double sigmaSample, double sigmaPrediction)
+        double GaussianSigmaErrorSlopeFunction(double x, double xCenter, double peak, double sigmaSample, double sigmaPrediction)
         {
             var xb2 = (x - xCenter) * (x - xCenter);
             var top = 4 * (sigmaPrediction - sigmaSample);
 
-            return top / (amplitude * xb2);
+            return top / (peak * xb2);
         }
 
         /// <summary>

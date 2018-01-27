@@ -5,16 +5,51 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApplication1"
         mc:Ignorable="d"
-        Title="MainWindow" Height="706.673" Width="827.544">
+        Title="MainWindow" Height="800" Width="1080">
     <Grid Margin="0,0,0,0">
-        <Button x:Name="capture" Content="Capture" HorizontalAlignment="Left" Margin="735,640,0,0" VerticalAlignment="Top" Width="75" Click="Capture" />
-        <TextBox x:Name="exposure" HorizontalAlignment="Left" Height="20" Margin="15,641,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="119" Text=".75" />
-        <Label x:Name="label" Content="Exposure (Seconds):" HorizontalAlignment="Left" Margin="10,615,0,0" VerticalAlignment="Top" Height="26" Width="124" RenderTransformOrigin="0.491,0.539"/>
-        <Image x:Name="preview" HorizontalAlignment="Left" Height="600" Margin="10,10,0,0" VerticalAlignment="Top" Width="800"/>
-        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="600" Margin="10,10,0,0" VerticalAlignment="Top" Width="800"/>
-        <Label x:Name="fps" Content="" HorizontalAlignment="Left" Margin="153,637,0,0" VerticalAlignment="Top" Height="26" Width="46" RenderTransformOrigin="0.491,0.539"/>
-        <Label x:Name="fpslabel" Content="FPS:" HorizontalAlignment="Left" Margin="153,615,0,0" VerticalAlignment="Top" Height="26" Width="46" RenderTransformOrigin="0.491,0.539"/>
-        <Label x:Name="starslabel" Content="Stars:" HorizontalAlignment="Left" Margin="223,615,0,0" VerticalAlignment="Top" Height="26" Width="46" RenderTransformOrigin="0.491,0.539"/>
-        <Label x:Name="stars" Content="0" HorizontalAlignment="Left" Margin="223,637,0,0" VerticalAlignment="Top" Height="26" Width="46" RenderTransformOrigin="0.491,0.539"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="256" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="128" />
+        </Grid.RowDefinitions>
+        <Canvas Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+            <Button x:Name="capture" Content="Capture" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Width="113" Click="Capture" Canvas.Left="944" Canvas.Top="67" RenderTransformOrigin="0.48,2.05" Height="51" />
+            <TextBox x:Name="exposure" HorizontalAlignment="Left" Height="20" Margin="0" TextWrapping="Wrap" VerticalAlignment="Top" Width="124" Text=".75" Canvas.Left="175" Canvas.Top="98" />
+            <Label x:Name="label" Content="Exposure (Seconds):" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="124" RenderTransformOrigin="0.491,0.539" Canvas.Left="175" Canvas.Top="67"/>
+            <Label x:Name="fps" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="46" RenderTransformOrigin="0.065,0.615" Canvas.Left="51" Canvas.Top="10" />
+            <Label x:Name="fpslabel" Content="FPS:" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="36" RenderTransformOrigin="1.194,0.577" Canvas.Left="10" Canvas.Top="10"/>
+            <Label x:Name="starslabel" Content="Stars:" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="46" RenderTransformOrigin="2.5,0.731" Canvas.Left="110" Canvas.Top="10"/>
+            <Label x:Name="stars" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="46" RenderTransformOrigin="0.491,0.539" Canvas.Left="156" Canvas.Top="10"/>
+            <Label x:Name="blackLevelLabel" Content="Black Level (ADU):" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="107" RenderTransformOrigin="2.5,0.731" Canvas.Top="67" Canvas.Left="10"/>
+            <TextBox x:Name="blackLevel" HorizontalAlignment="Left" TextChanged="blackLevel_TextChanged" Height="20" TextWrapping="Wrap" VerticalAlignment="Top" Width="119" Canvas.Top="98" Canvas.Left="10" />
+        </Canvas>
+        <Border Grid.Column="0" Grid.Row="0" BorderBrush="Black" BorderThickness="1" Height="600" Width="800" VerticalAlignment="Top">
+            <Image x:Name="preview" HorizontalAlignment="Left" VerticalAlignment="Top" MouseUp="preview_MouseUp" />
+        </Border>
+        <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0">
+            <Border BorderThickness="1" BorderBrush="Black" VerticalAlignment="Top" Margin="0,0,0,0" Width="256">
+                <Image x:Name="focus" Height="256" Margin="0,0,0,0" VerticalAlignment="Top" Width="256" SnapsToDevicePixels="true" RenderOptions.BitmapScalingMode="HighQuality" RenderOptions.EdgeMode="Aliased" Stretch="None" />
+            </Border>
+            <Border BorderThickness="1" BorderBrush="Black" VerticalAlignment="Top" Margin="0,0,0,0" Width="256">
+                <Image x:Name="plot" Height="256" Margin="0,0,0,0" VerticalAlignment="Top" Width="256" SnapsToDevicePixels="true" RenderOptions.BitmapScalingMode="HighQuality" RenderOptions.EdgeMode="Aliased" Stretch="None" />
+            </Border>
+            <StackPanel Margin="10,0,10,0" Orientation="Horizontal">
+                <Label x:Name="fwhmLabel" Content="FWHM:" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="70" RenderTransformOrigin="2.5,0.731"/>
+                <Label x:Name="fwhm" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="46" RenderTransformOrigin="0.491,0.539"/>
+                <Label x:Name="starPeakLabel" Content="Peak ADU:" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="70" RenderTransformOrigin="2.5,0.731"/>
+                <Label x:Name="starPeak" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="46" RenderTransformOrigin="0.491,0.539"/>
+            </StackPanel>
+            <StackPanel Margin="10,0,10,0" Orientation="Horizontal">
+                <Label x:Name="fitErrorLabel" Content="PSF Error:" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="70" RenderTransformOrigin="2.5,0.731"/>
+                <Label x:Name="fitError" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="165" RenderTransformOrigin="0.491,0.539"/>
+            </StackPanel>
+            <StackPanel Margin="10,0,10,0" Orientation="Horizontal">
+                <Label x:Name="saturatedLabel" Content="Saturated:" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="70" RenderTransformOrigin="2.5,0.731" Canvas.Left="921" Canvas.Top="-355"/>
+                <Label x:Name="saturated" Content="No" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Width="46" RenderTransformOrigin="0.491,0.539" Canvas.Left="991" Canvas.Top="-355"/>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </Window>

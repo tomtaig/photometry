@@ -27,20 +27,16 @@ namespace Tests
             ImageHeight = mat.Height;
             ImageWidth = mat.Width;
 
-            Image = new ushort[ImageHeight, ImageWidth];
+            Image = new ushort[ImageHeight * ImageWidth];
 
-            for (var y=0; y<ImageHeight; y++)
-            {
-                for (var x=0; x<ImageWidth; x++)
-                {
-                    this.Image[y, x] = mat.At<ushort>(y, x);
-                }
-            }
+            var image2 = new Mat(ImageHeight, ImageWidth, MatType.CV_16SC1, Image);
+
+            mat.ConvertTo(image2, MatType.CV_16SC1);
         }
 
         public Func<StarInfo, string> Name { get; set; }
         public Func<StarInfo, GaussianFitOptions> Options { get; set; }
-        public ushort[,] Image { get; set; }
+        public ushort[] Image { get; set; }
         public int ImageWidth { get; set; }
         public int ImageHeight { get; set; }
     }

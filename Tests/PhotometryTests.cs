@@ -13,7 +13,7 @@ namespace Tests
     [TestClass]
     public class PhotometryTests
     {
-        string _biasPath = "z:\\noise.fits";
+        string _biasPath = "d:\\p\\noise.fits";
         Random _rand = new Random();
                 
         [TestMethod]
@@ -24,11 +24,16 @@ namespace Tests
             for (var i = 0; i < 10; i++)
             {
                 var matches = 0;
-                var image = new Mat($"stars-{i}-noise.png", ImreadModes.Unchanged);
+                var image = new Mat($"stars-{i}-1.png", ImreadModes.Unchanged);
                 var photo = JsonConvert.DeserializeObject<FakePhoto>(File.ReadAllText($"stars-{i}.json"));
                 var unsaturatedStars = photo.Stars.Where(x => x.Peak < ushort.MaxValue).Count();
 
-                var results = Photometry.FindStars(image);
+                var pixels = new ushort[image.Height * image.Width];
+                var image2 = new Mat(image.Height, image.Width, MatType.CV_16SC1, pixels);
+
+                image.ConvertTo(image2, MatType.CV_16SC1);
+               
+                var results = Photometry.FindStars(pixels, image.Width, image.Height, 10000);
              
                 foreach (var result in results)
                 {
@@ -60,20 +65,13 @@ namespace Tests
 
             var options = new List<GaussianFitOptions>
             {
-                //new GaussianFitOptions { RadiusToSample = 2 },
-                //new GaussianFitOptions { RadiusToSample = 3 },
-                //new GaussianFitOptions { RadiusToSample = 4 },
-                //new GaussianFitOptions { RadiusToSample = 5 },
-                //new GaussianFitOptions { RadiusToSample = 6 },
-                //new GaussianFitOptions { RadiusToSample = 7 },
-                //new GaussianFitOptions { RadiusToSample = 8 },
-                new GaussianFitOptions { RadiusToSample = 2, IterationStepSize = .2, MinimumChangeThreshold = 0.001 },
-                new GaussianFitOptions { RadiusToSample = 3, IterationStepSize = .2, MinimumChangeThreshold = 0.001 },
-                new GaussianFitOptions { RadiusToSample = 4, IterationStepSize = .2, MinimumChangeThreshold = 0.001 },
-                new GaussianFitOptions { RadiusToSample = 5, IterationStepSize = .2, MinimumChangeThreshold = 0.001 },
-                new GaussianFitOptions { RadiusToSample = 6, IterationStepSize = .2, MinimumChangeThreshold = 0.001 },
-                new GaussianFitOptions { RadiusToSample = 7, IterationStepSize = .2, MinimumChangeThreshold = 0.001 },
-                new GaussianFitOptions { RadiusToSample = 8, IterationStepSize = .2, MinimumChangeThreshold = 0.001 }
+                new GaussianFitOptions { Radius = 2, MaxIterations = 1000, IterationStepSize = 10, MinimumChangeThreshold = 0.000001 },
+                new GaussianFitOptions { Radius = 3, MaxIterations = 1000, IterationStepSize = 10, MinimumChangeThreshold = 0.000001 },
+                new GaussianFitOptions { Radius = 4, MaxIterations = 1000, IterationStepSize = 10, MinimumChangeThreshold = 0.000001 },
+                new GaussianFitOptions { Radius = 5, MaxIterations = 1000, IterationStepSize = 10, MinimumChangeThreshold = 0.000001 },
+                new GaussianFitOptions { Radius = 6, MaxIterations = 1000, IterationStepSize = 10, MinimumChangeThreshold = 0.000001 },
+                new GaussianFitOptions { Radius = 7, MaxIterations = 1000, IterationStepSize = 10, MinimumChangeThreshold = 0.000001 },
+                new GaussianFitOptions { Radius = 8, MaxIterations = 1000, IterationStepSize = 10, MinimumChangeThreshold = 0.000001 }
             };
             
             var sources = new List<List<FitStarTest>>();
@@ -119,7 +117,7 @@ namespace Tests
                         starCount++;
 
                         var fitOption = source.Options(star);
-                        var fit = Photometry.FindStarSigmaWidth(source.Image, source.ImageWidth, source.ImageHeight, star, 0, fitOption);
+                        var fit = Photometry.FindStarGaussianPSF(source.Image, source.ImageWidth, source.ImageHeight, star, 0, fitOption);
 
                         if (fit.Result == GaussianFitResult.Clipped)
                         {
@@ -136,7 +134,7 @@ namespace Tests
                             Error = Math.Abs(fit.Width - star.Width),
                             Iterations = fit.Iterations,
                             FitResult = fit.Result.ToString(),
-                            SampleRadius = fitOption.RadiusToSample,
+                            SampleRadius = fitOption.Radius,
                             IterationStepSize = fitOption.IterationStepSize,
                             MinimumChangeThreshold = fitOption.MinimumChangeThreshold,
                             MaxIterations = fitOption.MaxIterations
@@ -159,7 +157,7 @@ namespace Tests
                 output.AppendLine(result.ToString());
             }
 
-            File.WriteAllText("fit-tests.csv", output.ToString());
+            File.WriteAllText("D:\\p\\fit-tests.csv", output.ToString());
         }
 
         [TestMethod]
@@ -193,7 +191,7 @@ namespace Tests
                 simulator.AddPRNUNoise();
                 simulator.SaveAs16BitBitmap($"stars-{i}-5.png");
 
-                var background = Photometry.FindSkyBackgroundIntensity(simulator.Image);
+                var background = Photometry.FindSkyBackgroundIntensity(simulator.ImageArray);
                 Photometry.Subtract(simulator.Image, (ushort)background);
                 simulator.SaveAs16BitBitmap($"stars-{i}-6.png");
 
@@ -214,7 +212,7 @@ namespace Tests
             var px = star.X;
             var py = star.Y;
             var distanceSquared = (px - star.X) * (px - star.X) + (py - star.Y) * (py - star.Y);
-            var amplitude = Photometry.GaussianAmplitude(distanceSquared, star.Peak, star.Width);
+            var amplitude = Photometry.GaussianAmplitudeFromPSF(distanceSquared, star.Peak, star.Width);
             var pixel = (amplitude > ushort.MaxValue) ? ushort.MaxValue : (ushort)amplitude;
             
             if (Math.Abs(pixel - Math.Floor(star.Peak)) > 1 && star.Peak < ushort.MaxValue)

@@ -1,0 +1,150 @@
+﻿<Window x:Class="Prototype.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prototype"
+        xmlns:controls="clr-namespace:Prototype.Controls"
+        mc:Ignorable="d"
+        Title="Prototype Capture" Height="683.144" Width="1087.181">
+    <Window.Resources>
+        <LinearGradientBrush x:Key="ActiveIndicator" StartPoint="0,0.2" EndPoint="0.2,1.4">
+            <GradientStop Offset="0" Color="Green" />
+            <GradientStop Offset="1" Color="LightGreen" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="InactiveIndicator" StartPoint="0,0.2" EndPoint="0.2,1.4">
+            <GradientStop Offset="0" Color="IndianRed" />
+            <GradientStop Offset="1" Color="OrangeRed" />
+        </LinearGradientBrush>
+        <ControlTemplate x:Key="MainTabHeader" TargetType="{x:Type controls:MainTabHeader}">
+            <Grid Name="grid" Width="100" Height="100">
+                <Canvas>
+                    <Border Canvas.Left="0" Canvas.Top="5" BorderBrush="LightGray" BorderThickness="1">
+                        <Rectangle Name="indicator" Width="100" Height="2" Fill="{DynamicResource InactiveIndicator}" />                        
+                    </Border>
+                    <ContentPresenter Margin="0 10 0 0" Width="100" Height="100" Content="{TemplateBinding Content}" />
+                </Canvas>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsConnected" Value="True">
+                    <Setter Property="Fill" TargetName="indicator" Value="{DynamicResource ActiveIndicator}" />
+                </Trigger>
+                <Trigger Property="IsConnected" Value="False">
+                    <Setter Property="Fill" TargetName="indicator" Value="{DynamicResource InactiveIndicator}" />
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <ControlTemplate x:Key="MainTab" TargetType="{x:Type TabItem}">
+            <Border Name="Border" BorderThickness="1,1,1,0" BorderBrush="Gray" CornerRadius="4,4,0,0" Margin="2,2,0,-1">
+                <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center" ContentSource="Header" Margin="10,2"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter TargetName="Border" Property="Background" Value="White" />
+                </Trigger>
+                <Trigger Property="IsSelected" Value="False">
+                    <Setter TargetName="Border" Property="Background" Value="GhostWhite" />
+                    <Setter TargetName="Border" Property="BorderThickness" Value="1,1,1,1" />
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+    </Window.Resources>
+    <Grid DataContext="{Binding Source={StaticResource session}}" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="22" />
+        </Grid.RowDefinitions>
+        <TabControl Grid.Row="0" BorderBrush="Gray" BorderThickness="0,1,0,1">
+            <TabItem Template="{StaticResource MainTab}">
+                <TabItem.Header>
+                    <controls:MainTabHeader Template="{StaticResource MainTabHeader}" IsConnected="{Binding Camera.IsCameraConnected}">
+                        <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
+                            <Label Padding="0 5 0 5" HorizontalAlignment="Center">Camera</Label>
+                            <StackPanel Orientation="Vertical" Margin="10 0 10 0" Visibility="{Binding Camera.CameraTabNoConnectVisibility}">
+                                <Label Padding="0" HorizontalContentAlignment="Center" Width="80">Not</Label>
+                                <Label Padding="0" HorizontalContentAlignment="Center" Width="80">Connected</Label>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="10 0 10 0" Visibility="{Binding Camera.CameraTabInfoVisibility}">
+                                <Label Padding="0" HorizontalAlignment="Left" Width="50">Gain</Label>
+                                <Label Padding="0" HorizontalContentAlignment="Right" Width="30" Content="{Binding Camera.Gain}"></Label>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="10 0 10 0" Visibility="{Binding Camera.CameraTabInfoVisibility}">
+                                <Label Padding="0" HorizontalAlignment="Left" Width="50">Offset</Label>
+                                <Label Padding="0" HorizontalContentAlignment="Right" Width="30" Content="{Binding Camera.Offset}"></Label>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="10 0 10 0" Visibility="{Binding Camera.CameraTabInfoVisibility}">
+                                <Label Padding="0" HorizontalAlignment="Left" Width="50">Gamma</Label>
+                                <Label Padding="0" HorizontalContentAlignment="Right" Width="30" Content="{Binding Camera.Gamma}"></Label>
+                            </StackPanel>
+                        </StackPanel>
+                    </controls:MainTabHeader>
+                </TabItem.Header>
+                <local:Camera DataContext="{Binding Camera}"></local:Camera>
+            </TabItem>
+            <TabItem Template="{StaticResource MainTab}">
+                <TabItem.Header>
+                    <controls:MainTabHeader Template="{StaticResource MainTabHeader}" IsConnected="{Binding Cooler.IsOnAndTargetSet}">
+                        <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
+                            <Label Padding="0 5 0 5" HorizontalAlignment="Center">Cooler</Label>
+                            <StackPanel Orientation="Horizontal" Margin="10 0 10 0" Visibility="{Binding Cooler.CoolerTabInfoVisibility}">
+                                <Label Padding="0" HorizontalAlignment="Left" Width="50">Temp.</Label>
+                                <TextBlock Padding="0" Width="30" TextAlignment="Right" Text="{Binding Cooler.LastTemperatureReading, StringFormat={}{0}c}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="10 0 10 0" Visibility="{Binding Cooler.CoolerTabInfoVisibility}">
+                                <Label Padding="0" HorizontalAlignment="Left" Width="50">Target</Label>
+                                <TextBlock Padding="0" Width="30" TextAlignment="Right" Text="{Binding Cooler.TargetTemperature, StringFormat={}{0}c}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="10 0 10 0" Visibility="{Binding Cooler.CoolerTabNotOnVisibility}">
+                                <Label Padding="0" HorizontalContentAlignment="Center" Width="80" Content="{Binding Cooler.Status}"></Label>
+                            </StackPanel>
+                        </StackPanel>
+                    </controls:MainTabHeader>
+                </TabItem.Header>
+                <local:Cooler DataContext="{Binding .}"></local:Cooler>
+            </TabItem>
+            <TabItem Template="{StaticResource MainTab}">
+                <TabItem.Header>
+                    <controls:MainTabHeader Template="{StaticResource MainTabHeader}" IsConnected="{Binding Filter.IsConnected}">
+                        <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
+                            <Label Padding="0 5 0 5" HorizontalAlignment="Center">Filter</Label>
+                            <StackPanel Orientation="Horizontal" Margin="10 0 10 0" Visibility="{Binding Filter.FilterTabInfoVisibility}">
+                                <Label Padding="0" HorizontalAlignment="Left" Width="50">Slot</Label>
+                                <TextBlock Padding="0" Width="30" TextAlignment="Right" Text="{Binding Filter.TabFilterSlot}" />
+                            </StackPanel>
+                            <Label Margin="10 0 10 0" Visibility="{Binding Filter.FilterTabInfoVisibility}" Content="{Binding Filter.FilterStatus}" Width="80" HorizontalContentAlignment="Center"/>
+                            <StackPanel Orientation="Vertical" Margin="10 0 10 0" Visibility="{Binding Filter.FilterTabNoConnectVisibility}">
+                                <Label Padding="0" HorizontalContentAlignment="Center" Width="80">Not</Label>
+                                <Label Padding="0" HorizontalContentAlignment="Center" Width="80">Connected</Label>
+                            </StackPanel>
+                        </StackPanel>
+                    </controls:MainTabHeader>
+                </TabItem.Header>
+                <local:Filter DataContext="{Binding .}"></local:Filter>
+            </TabItem>
+            <TabItem Template="{StaticResource MainTab}" Visibility="Collapsed">
+                <TabItem.Header>
+                    <controls:MainTabHeader Template="{StaticResource MainTabHeader}">
+                        <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
+                            <Label Padding="0 5 0 5" HorizontalAlignment="Center">Focus</Label>
+                            <Label Padding="0" HorizontalAlignment="Center">40m ago</Label>
+                            <Label Padding="0" HorizontalAlignment="Center">FWHM: 5.2</Label>
+                        </StackPanel>
+                    </controls:MainTabHeader>
+                </TabItem.Header>
+            </TabItem>
+            <TabItem Template="{StaticResource MainTab}" Visibility="Collapsed">
+                <TabItem.Header>
+                    <controls:MainTabHeader Template="{StaticResource MainTabHeader}">
+                        <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
+                            <Label Padding="0 5 0 5" HorizontalAlignment="Center">Observation</Label>
+                            <Label Padding="0" HorizontalAlignment="Center">10m (55m left)</Label>
+                            <ProgressBar Minimum="0" Maximum="100" Margin="0 15 0 0" Value="75" Height="10" />
+                            <Button Margin="0 3 0 0" Background="GhostWhite">Pause</Button>
+                        </StackPanel>
+                    </controls:MainTabHeader>
+                </TabItem.Header>
+            </TabItem>
+        </TabControl>        
+        <Label Grid.Row="2" />
+    </Grid>
+</Window>

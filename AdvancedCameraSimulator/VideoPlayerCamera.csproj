@@ -8,8 +8,8 @@
     <ProjectGuid>{64308775-BD4A-469C-BCAB-3ED830B811AF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ASCOM.AdvancedSimulator</RootNamespace>
-    <AssemblyName>ASCOM.AdvancedSimulator.Camera</AssemblyName>
+    <RootNamespace>Camsim.Ascom</RootNamespace>
+    <AssemblyName>Camsim.Ascom</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>

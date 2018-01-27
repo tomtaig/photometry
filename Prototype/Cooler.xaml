@@ -1,0 +1,103 @@
+﻿<UserControl x:Class="Prototype.Cooler"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Prototype"
+             xmlns:oxy="http://oxyplot.org/wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="5"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="0">
+            <GroupBox Header="Cooler" Padding="10" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="Turn On" Padding="5" Margin="0 0 0 0" IsEnabled="{Binding Cooler.TurnOnEnabled}" Click="TurnOnClick" />
+                    <Button Content="Turn Off" Padding="5" Margin="10 0 0 0" IsEnabled="{Binding Cooler.TurnOffEnabled}" Click="TurnOffClick" />
+                </StackPanel>
+            </GroupBox>
+
+            <GroupBox Header="Control" Padding="10" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Width="300" Visibility="{Binding Cooler.IsOnVisibility}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50"></RowDefinition>
+                        <RowDefinition Height="20"></RowDefinition>
+                        <RowDefinition Height="20"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Vertical">
+                        <Label>Target Temperature (C):</Label>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="50" />
+                            </Grid.ColumnDefinitions>
+                            <Slider Name="targetTemperature" TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="True" Margin="0 0 10 0" Grid.Column="0" Minimum="-50" Maximum="50" Value="{Binding Cooler.TargetTemperature}" />
+                            <TextBox Grid.Column="1" Text="{Binding ElementName=targetTemperature, Path=Value, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Orientation="Vertical">
+                        <Button Content="Set Target Temperature" HorizontalContentAlignment="Center" Click="TargetTemperatureClick" />
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+        </StackPanel>
+        
+        <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" />
+
+        <Grid Grid.Row="2" Background="White">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="10" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="10" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="20" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50" />
+                    <ColumnDefinition Width="100" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Row="0" Grid.Column="0" Margin="10 0 0 0" Padding="0">Status</Label>
+                <Label Grid.Row="0" Grid.Column="1" Margin="10 0 0 0" Padding="0" Content="{Binding Cooler.Status}" />
+                <Label Grid.Row="1" Grid.Column="0" Margin="10 0 0 0" Padding="0" Foreground="DarkBlue">Power</Label>
+                <TextBlock Grid.Row="1" Grid.Column="1" Margin="10 0 0 0" Padding="0" Foreground="DarkBlue" Text="{Binding Cooler.LastPowerReading, StringFormat={}{0}%}" Visibility="{Binding Cooler.IsOnVisibility}" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Margin="10 0 0 0" Padding="0" Foreground="DarkBlue" Text="-" Visibility="{Binding IsOffVisibility}" />
+                <Label Grid.Row="2" Grid.Column="0" Margin="10 0 0 0" Padding="0" Foreground="DarkRed">Temp.</Label>
+                <TextBlock Grid.Row="2" Grid.Column="1" Margin="10 0 0 0" Padding="0"  Foreground="DarkRed" Text="{Binding Cooler.LastTemperatureReading, StringFormat={}{0}c}" Visibility="{Binding Camera.IsConnectedVisibility}" />
+            </Grid>
+            <oxy:Plot Name="readings" Grid.Column="2" Grid.Row="1">
+                <oxy:Plot.Axes>
+                    <oxy:LinearAxis Name="yAxis" Position="Left" Minimum="-50" Maximum="100" MajorStep="20" MinorStep="10"
+                                    MinorGridlineStyle="Dot" MinorGridlineThickness="1" MinorGridlineColor="LightGray"
+                                    MajorGridlineColor="LightGray" MajorGridlineThickness="1" MajorGridlineStyle="Dot" />
+                    <oxy:DateTimeAxis Name="xAxis" Position="Bottom" MajorTickSize="0" MinorTickSize="0" TickStyle="None" 
+                                    MinorGridlineStyle="Dot" MinorGridlineThickness="1" MinorGridlineColor="LightGray"
+                                    MajorGridlineColor="LightGray" MajorGridlineThickness="1" MajorGridlineStyle="Dot" />
+                </oxy:Plot.Axes>
+                <oxy:Plot.Series>
+                    <oxy:LineSeries Color="DarkBlue" ItemsSource="{Binding Cooler.TemperatureReadings}"/>
+                    <oxy:LineSeries Color="DarkRed" ItemsSource="{Binding Cooler.PowerReadings}"/>
+                </oxy:Plot.Series>
+            </oxy:Plot>
+        </Grid>
+    </Grid>
+</UserControl>

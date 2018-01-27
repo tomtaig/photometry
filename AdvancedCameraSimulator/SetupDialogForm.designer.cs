@@ -74,7 +74,7 @@ namespace ASCOM.AdvancedSimulator
             // 
             this.picASCOM.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.picASCOM.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picASCOM.Image = global::ASCOM.AdvancedSimulator.Properties.Resources.ASCOM;
+            this.picASCOM.Image = global::Camsim.Ascom.Properties.Resources.ASCOM;
             this.picASCOM.Location = new System.Drawing.Point(292, 9);
             this.picASCOM.Name = "picASCOM";
             this.picASCOM.Size = new System.Drawing.Size(48, 56);

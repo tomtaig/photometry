@@ -70,12 +70,12 @@ namespace ASCOM.AdvancedSimulator
         /// ASCOM DeviceID (COM ProgID) for this driver.
         /// The DeviceID is used by ASCOM applications to load the driver at runtime.
         /// </summary>
-        internal static string driverID = "ASCOM.AdvancedSimulator.Camera";
+        internal static string driverID = "VideoPlayerCameraSimulator";
         // TODO Change the descriptive string for your driver then remove this line
         /// <summary>
         /// Driver description that displays in the ASCOM Chooser.
         /// </summary>
-        private static string driverDescription = "ASCOM Camera Driver for AdvancedSimulator.";
+        private static string driverDescription = "Video Player Camera Simulator";
 
         internal static string comPortProfileName = "COM Port"; // Constants used for Profile persistence
         internal static string comPortDefault = "COM1";
@@ -223,7 +223,7 @@ namespace ASCOM.AdvancedSimulator
                 reader.NewFrame -= Reader_NewFrame;
             }
 
-            reader = new FileVideoSource("z:\\star.avi");
+            reader = new FileVideoSource("d:\\p\\star.avi");
             reader.PlayingFinished += Reader_PlayingFinished;
             reader.NewFrame += Reader_NewFrame;
             reader.Start();

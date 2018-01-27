@@ -17,11 +17,16 @@ namespace Tests
         Random _rand;
 
         public readonly FakePhoto Photo = new FakePhoto();
-        public readonly Mat Image = new Mat(600, 800, MatType.CV_16UC1);
+        public readonly ushort[] ImageArray;
+        public readonly Mat Image;
 
         public PhotoSimulator(Random random)
         {
             _rand = random;
+
+            ImageArray = new ushort[800 * 600];
+
+            Image = new Mat(600, 800, MatType.CV_16UC1, ImageArray);
 
             Image.SetTo(new Scalar(0));
         }
@@ -125,7 +130,7 @@ namespace Tests
 
                 do
                 {
-                    value = Photometry.GaussianAmplitude(distance * distance, star.Peak, star.Width);
+                    value = Photometry.GaussianAmplitudeFromPSF(distance * distance, star.Peak, star.Width);
                     distance++;
                 }
                 while (value > drawThreshold);
@@ -183,7 +188,7 @@ namespace Tests
                 for (var px = x1; px < x2; px++)
                 {
                     var distanceSquared = (px - star.X) * (px - star.X) + (py - star.Y) * (py - star.Y);
-                    var amplitude = Photometry.GaussianAmplitude(distanceSquared, star.Peak, star.Width);
+                    var amplitude = Photometry.GaussianAmplitudeFromPSF(distanceSquared, star.Peak, star.Width);
                     var pixel = (amplitude > ushort.MaxValue) ? ushort.MaxValue : (ushort)amplitude;
                     Image.Set(py, px, pixel);
                 }
