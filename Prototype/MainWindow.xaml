@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Prototype"
         xmlns:controls="clr-namespace:Prototype.Controls"
         mc:Ignorable="d"
-        Title="Prototype Capture" Height="683.144" Width="1087.181">
+        Title="Prototype Capture" Height="683.144" Width="1087.181" UseLayoutRounding="True">
     <Window.Resources>
         <LinearGradientBrush x:Key="ActiveIndicator" StartPoint="0,0.2" EndPoint="0.2,1.4">
             <GradientStop Offset="0" Color="Green" />
@@ -52,9 +52,8 @@
     <Grid DataContext="{Binding Source={StaticResource session}}" >
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition Height="22" />
         </Grid.RowDefinitions>
-        <TabControl Grid.Row="0" BorderBrush="Gray" BorderThickness="0,1,0,1">
+        <TabControl Grid.Row="0" BorderBrush="Gray" BorderThickness="0,1,0,1" Padding="5,0,5,0">
             <TabItem Template="{StaticResource MainTab}">
                 <TabItem.Header>
                     <controls:MainTabHeader Template="{StaticResource MainTabHeader}" IsConnected="{Binding Camera.IsCameraConnected}">
@@ -66,15 +65,11 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="10 0 10 0" Visibility="{Binding Camera.CameraTabInfoVisibility}">
                                 <Label Padding="0" HorizontalAlignment="Left" Width="50">Gain</Label>
-                                <Label Padding="0" HorizontalContentAlignment="Right" Width="30" Content="{Binding Camera.Gain}"></Label>
+                                <Label Padding="0" HorizontalContentAlignment="Right" Width="30" Content="{Binding Camera.DiscreteGain}"></Label>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="10 0 10 0" Visibility="{Binding Camera.CameraTabInfoVisibility}">
                                 <Label Padding="0" HorizontalAlignment="Left" Width="50">Offset</Label>
                                 <Label Padding="0" HorizontalContentAlignment="Right" Width="30" Content="{Binding Camera.Offset}"></Label>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="10 0 10 0" Visibility="{Binding Camera.CameraTabInfoVisibility}">
-                                <Label Padding="0" HorizontalAlignment="Left" Width="50">Gamma</Label>
-                                <Label Padding="0" HorizontalContentAlignment="Right" Width="30" Content="{Binding Camera.Gamma}"></Label>
                             </StackPanel>
                         </StackPanel>
                     </controls:MainTabHeader>
@@ -121,16 +116,15 @@
                 </TabItem.Header>
                 <local:Filter DataContext="{Binding .}"></local:Filter>
             </TabItem>
-            <TabItem Template="{StaticResource MainTab}" Visibility="Collapsed">
+            <TabItem Template="{StaticResource MainTab}">
                 <TabItem.Header>
                     <controls:MainTabHeader Template="{StaticResource MainTabHeader}">
                         <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
                             <Label Padding="0 5 0 5" HorizontalAlignment="Center">Focus</Label>
-                            <Label Padding="0" HorizontalAlignment="Center">40m ago</Label>
-                            <Label Padding="0" HorizontalAlignment="Center">FWHM: 5.2</Label>
                         </StackPanel>
                     </controls:MainTabHeader>
                 </TabItem.Header>
+                <local:Focus DataContext="{Binding .}"></local:Focus>
             </TabItem>
             <TabItem Template="{StaticResource MainTab}" Visibility="Collapsed">
                 <TabItem.Header>
@@ -144,7 +138,6 @@
                     </controls:MainTabHeader>
                 </TabItem.Header>
             </TabItem>
-        </TabControl>        
-        <Label Grid.Row="2" />
+        </TabControl>
     </Grid>
 </Window>

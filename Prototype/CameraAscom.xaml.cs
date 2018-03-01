@@ -37,6 +37,56 @@ namespace Prototype
             {
                 MessageBox.Show(result.ErrorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        } 
+        }
+
+        private void GainSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var session = Application.Current.Resources["session"] as Session;
+
+            if (!session.Camera.IsConnecting)
+            {
+                session.SetGainMode((string)gainComboBox.SelectedValue);
+            }
+        }
+
+        private void GainValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            var session = Application.Current.Resources["session"] as Session;
+
+            if (!session.Camera.IsConnecting)
+            {
+                session.SetDiscreteGain(gainSlider.Value);
+            }
+        }
+
+        private void BinXChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var session = Application.Current.Resources["session"] as Session;
+
+            if (!session.Camera.IsConnecting)
+            {
+                session.ChangeBinX(int.Parse(e.AddedItems[0].ToString()));
+            }
+        }
+
+        private void BinYChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var session = Application.Current.Resources["session"] as Session;
+
+            if (!session.Camera.IsConnecting)
+            {
+                session.ChangeBinY(int.Parse(e.AddedItems[0].ToString()));
+            }
+        }
+
+        private void BinXYChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var session = Application.Current.Resources["session"] as Session;
+
+            if (!session.Camera.IsConnecting)
+            {
+                session.ChangeBinXY(int.Parse(e.AddedItems[0].ToString().Split('x')[0]));
+            }
+        }
     }
 }

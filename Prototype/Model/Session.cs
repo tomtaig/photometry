@@ -6,6 +6,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Collections.Generic;
+using OpenCvSharp;
+using System.Windows.Media.Imaging;
 
 namespace Prototype
 {
@@ -21,6 +24,7 @@ namespace Prototype
             Camera = new CameraView();
             Cooler = new CoolerView();
             Filter = new FilterView();
+            Focus = new FocusView();
 
             FilterWheelService = new AscomFilterWheelService();
             FilterWheelService.Initialize(this);
@@ -31,6 +35,7 @@ namespace Prototype
         public CameraView Camera { get; set; }
         public CoolerView Cooler { get; set; }
         public FilterView Filter { get; set; }
+        public FocusView Focus { get; set; }
 
         public OperationResult SetCameraInterface()
         {
@@ -56,6 +61,201 @@ namespace Prototype
                 return result;
             }
 
+
+            return OperationResult.Ok;
+        }
+        
+        public void SetDiscreteGain(double value)
+        {
+            CameraService.SetDiscreteGain((short)value);
+
+            Camera.ChangeDiscreteGain(value);
+        }
+        
+        public void SelectFocusStar(int x1, int y1, int x2, int y2)
+        {
+            Focus.SetStarSelection(x1, y1, x2, y2);
+        }
+
+        public void ChangeBinX(int x)
+        {
+            CameraService.SetBinX(x);
+
+            Camera.ChangeBinX(x);
+        }
+
+        public void ChangeBinY(int y)
+        {
+            CameraService.SetBinY(y);
+
+            Camera.ChangeBinY(y); 
+        }
+
+        public void ExposureChange(double min, double sec, double msec)
+        {
+            var seconds = min * 60 + sec + (msec / 1000.0);
+
+            if(seconds < Camera.ExposureMin)
+            {
+                min = 0;
+                sec = 0;
+                msec = 0;
+
+                if(Camera.ExposureMin < 1)
+                {
+                    msec = Camera.ExposureMin * 1000;
+                }
+                else if (Camera.ExposureMin < 60)
+                {
+                    sec = Camera.ExposureMin;
+                }
+                else
+                {
+                    min = Camera.ExposureMin / 60.0;
+                }
+            }
+            else if (seconds > Camera.ExposureMax)
+            {
+                min = Camera.ExposureMax / 60.0;
+                sec = (min - (int)min) * 60.0;
+                msec = (sec / 60.0) - (int)(sec / 60.0) * 1000;
+            }
+
+            Focus.ExposureChange(min, sec, msec);
+        }
+        
+        public void Capture(Action<Mat> success)
+        {
+            Focus.StartCapturing();
+
+            if (Focus.IsSubFrameActive)
+            {
+                var frame = Focus.GetSubFrame();
+
+                CameraService.SetRegion(frame.ChipX1, frame.ChipY1, frame.ChipX2 - frame.ChipX1, frame.ChipY2 - frame.ChipY1);
+                Camera.SetRegion(frame.ChipX1, frame.ChipY1, frame.ChipX2 - frame.ChipX1, frame.ChipY2 - frame.ChipY1);
+            }
+            else
+            {
+                CameraService.SetRegion(0, 0, Camera.BinnedX, Camera.BinnedY);
+                Camera.SetRegion(0, 0, Camera.BinnedX, Camera.BinnedY);
+            }
+
+            var task = CameraService.Capture(Focus.Exposure);
+
+            task.ContinueWith(x =>
+            {
+                if(x.Status == TaskStatus.RanToCompletion)
+                {
+                    success(x.Result);
+
+                    if (Focus.IsLoopingCapture)
+                    {
+                        Capture(success);
+                    }
+                    else
+                    {
+                        Focus.StopCapturing();
+                    }
+                }
+                else
+                {
+                    Focus.StopCapturing();
+                }
+            });
+
+            task.Start();
+        }
+
+        public void ChangeBinXY(int xy)
+        {
+            CameraService.SetBinXY(xy);
+            Camera.ChangeBinXY(xy);
+        }
+
+        public void SetSymmetricBins(List<string> bins)
+        {
+            Camera.ChangeAsymmetricBinning(false);
+
+            Camera.BinValues.Clear();
+
+            foreach (var bin in bins)
+            {
+                Camera.BinValues.Add(bin);
+            }
+        }
+        
+        public void SetAsymmetricBins(List<string> x, List<string> y)
+        {
+            Camera.ChangeAsymmetricBinning(true);
+
+            Camera.BinXValues.Clear();
+
+            foreach (var bin in x)
+            {
+                Camera.BinXValues.Add(bin);
+            }
+
+            Camera.BinYValues.Clear();
+
+            foreach (var bin in y)
+            {
+                Camera.BinYValues.Add(bin);
+            }
+        }
+
+        public void ApplyFocusRegion(int x, int y, int width, int height)
+        {
+            CameraService.SetRegion(x, y, width, height);
+
+            Camera.SetRegion(x, y, width, height);
+        }
+
+        public void ResetRegion()
+        {
+            CameraService.ClearRegion();
+
+            Camera.ClearRegion();
+        }
+
+        public void SetGainOptions(IEnumerable<GainOption> options)
+        {
+            Camera.Gains.Clear();
+
+            foreach (var option in options)
+            {
+                Camera.Gains.Add(option);
+            }
+        }
+
+        public OperationResult SetGainSettings(bool discrete, double min, double max)
+        {
+            Camera.ChangeGainSettings(discrete, min, max);
+
+            return OperationResult.Ok;
+        }
+
+        public void EnableSubFrame()
+        {
+            Focus.SetSubFrameActive(true);
+        }
+
+        public void DisableSubFrame()
+        {
+            Focus.SetSubFrameActive(false);
+        }
+
+        public OperationResult SetGainMode(string value)
+        {
+            if(Camera.IsGainDiscrete)
+            {
+                throw new ArgumentException();
+            }
+
+            CameraService.SetGainMode(value);
+
+            Camera.ChangeGainMode(Camera.Gains.IndexOf(Camera.Gains.Single(x => x.Value == value)));
+            
             return OperationResult.Ok;
         }
 
@@ -65,8 +265,11 @@ namespace Prototype
 
             if(!result.IsError)
             {
+                Focus.Configure(Camera);
                 StartMonitorCoolingTask();
+                ExposureChange(Focus.ExposureMinute, Focus.ExposureSecond, Focus.ExposureMillisecond);
             }
+
 
             return result;
         }
@@ -97,7 +300,7 @@ namespace Prototype
             return result;
         }
 
-        bool WarnAboutCooler()
+        public bool WarnAboutCooler()
         {
             var result = MessageBox.Show("The cooler is on. Consider increasing the sensor temperature to protect equipment or press OK to continue anyway.", "Cooler On", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
 

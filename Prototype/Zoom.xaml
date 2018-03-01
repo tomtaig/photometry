@@ -1,0 +1,14 @@
+﻿<Window x:Class="Prototype.Zoom"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Prototype"
+        mc:Ignorable="d"
+        Title="Zoom" Height="300" Width="300">
+    <StackPanel IsHitTestVisible="True" Orientation="Vertical" Canvas.Top="0" Canvas.Right="0">
+        <Button>Fit Window</Button>
+        <Button>Actual Size</Button>
+        <Slider Width="200" Margin="15" VerticalAlignment="Center" TickPlacement="BottomRight" IsSnapToTickEnabled="False" Minimum="1" Maximum="10" />
+    </StackPanel>
+</Window>

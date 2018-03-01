@@ -30,7 +30,7 @@ namespace Prototype
         {
             var model = (CameraView)DataContext;
 
-            model.ChangeGain(gain.Value);
+            model.ChangeDiscreteGain((short)gain.Value);
         }
 
         public void OffsetChanged(object sender, RoutedEventArgs e)
@@ -38,13 +38,6 @@ namespace Prototype
             var model = (CameraView)DataContext;
 
             model.ChangeOffset(offset.Value);
-        }
-
-        public void GammaChanged(object sender, RoutedEventArgs e)
-        {
-            var model = (CameraView)DataContext;
-
-            model.ChangeGamma(gamma.Value);
         }
     }
 }

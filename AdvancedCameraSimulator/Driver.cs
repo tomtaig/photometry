@@ -470,8 +470,7 @@ namespace ASCOM.AdvancedSimulator
         {
             get
             {
-                tl.LogMessage("CCDTemperature Get Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("CCDTemperature", false);
+                return 0;
             }
         }
 
@@ -602,7 +601,7 @@ namespace ASCOM.AdvancedSimulator
             get
             {
                 tl.LogMessage("ExposureMax Get Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("ExposureMax", false);
+                return 600;
             }
         }
 
@@ -611,7 +610,7 @@ namespace ASCOM.AdvancedSimulator
             get
             {
                 tl.LogMessage("ExposureMin Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("ExposureMin", false);
+                return 0.0001;
             }
         }
 
@@ -620,7 +619,7 @@ namespace ASCOM.AdvancedSimulator
             get
             {
                 tl.LogMessage("ExposureResolution Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("ExposureResolution", false);
+                return 0.01;
             }
         }
 
@@ -665,8 +664,7 @@ namespace ASCOM.AdvancedSimulator
         {
             get
             {
-                tl.LogMessage("GainMax Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("GainMax", false);
+                return 100;
             }
         }
 
@@ -674,8 +672,7 @@ namespace ASCOM.AdvancedSimulator
         {
             get
             {
-                tl.LogMessage("GainMin Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("GainMin", true);
+                return 0;
             }
         }
 

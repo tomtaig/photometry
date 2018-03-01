@@ -41,7 +41,7 @@ namespace Prototype
 
             if(result.IsError)
             {
-                MessageBox.Show(result.ErrorMessage, "Connect Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(result.ErrorMessage, "Filter Wheel Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -49,7 +49,12 @@ namespace Prototype
         {
             var session = Application.Current.Resources["session"] as Session;
 
-            session.DisconnectWheel();
+            var result = session.DisconnectWheel();
+            
+            if (result.IsError)
+            {
+                MessageBox.Show(result.ErrorMessage, "Filter Wheel Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void WheelSelectionChanged(object sender, RoutedEventArgs e)
@@ -69,8 +74,13 @@ namespace Prototype
         private void SetFilterClick(object sender, RoutedEventArgs e)
         {
             var session = Application.Current.Resources["session"] as Session;
+            
+            var result = session.MoveFilterWheel();
 
-            session.MoveFilterWheel();
+            if (result.IsError)
+            {
+                MessageBox.Show(result.ErrorMessage, "Filter Wheel Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

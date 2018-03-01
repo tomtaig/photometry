@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "App", "WpfApplication1\App.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{0DBDA976-332C-48B2-B963-2A2AA644F551}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoPlayerCamera", "AdvancedCameraSimulator\VideoPlayerCamera.csproj", "{64308775-BD4A-469C-BCAB-3ED830B811AF}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Photometry", "Photometry\Photometry.csproj", "{04C2E54F-BF14-45EA-A8C1-987A4DA9703A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prototype", "Prototype\Prototype.csproj", "{2431C550-C36C-4159-B98F-4E9ED3C57658}"
@@ -27,10 +25,6 @@ Global
 		{0DBDA976-332C-48B2-B963-2A2AA644F551}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DBDA976-332C-48B2-B963-2A2AA644F551}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DBDA976-332C-48B2-B963-2A2AA644F551}.Release|Any CPU.Build.0 = Release|Any CPU
-		{64308775-BD4A-469C-BCAB-3ED830B811AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{64308775-BD4A-469C-BCAB-3ED830B811AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{64308775-BD4A-469C-BCAB-3ED830B811AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{64308775-BD4A-469C-BCAB-3ED830B811AF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{04C2E54F-BF14-45EA-A8C1-987A4DA9703A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{04C2E54F-BF14-45EA-A8C1-987A4DA9703A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04C2E54F-BF14-45EA-A8C1-987A4DA9703A}.Release|Any CPU.ActiveCfg = Release|Any CPU
