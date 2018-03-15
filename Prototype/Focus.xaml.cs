@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Tests;
 
 namespace Prototype
 {
@@ -95,33 +96,17 @@ namespace Prototype
 
         void Capture(Session session)
         {
-            session.Capture(result =>
+            session.Focus.FrameChanged = (new Action(() => 
             {
-                var capture = new CaptureView
-                {
-                    BinnedX = session.Camera.BinnedX,
-                    BinnedY = session.Camera.BinnedY,
-                    ChipX = session.Camera.UnbinnedX,
-                    ChipY = session.Camera.UnbinnedY
-                };
+                Dispatcher.Invoke(() => RenderCapture());
+            }));
 
-                if (session.Camera.IsSubFrameActive)
-                {
-                    capture.Frame = new CaptureView.SubFrame
-                    {
-                        ChipX1 = session.Camera.SubFrameX,
-                        ChipY1 = session.Camera.SubFrameY,
-                        ChipX2 = session.Camera.SubFrameX + session.Camera.SubFrameWidth,
-                        ChipY2 = session.Camera.SubFrameY + session.Camera.SubFrameHeight
-                    };
-                }
-                
-                capture.Image = result;
+            session.Focus.RoiFrameChanged = (new Action(() =>
+            {
+                Dispatcher.Invoke(() => RenderCaptureROI());
+            }));
 
-                session.Focus.SetCapture(capture);
-                
-                RenderCapture(() => { });
-            });
+            session.Capture();
         }
         
         void BoostSliderChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -132,11 +117,13 @@ namespace Prototype
             {
                 session.Focus.BoostChange(null);
 
-                RenderCapture(() => { });
+                RenderCapture();
+
+                RenderCaptureROI();
             }
         }
 
-        void RenderCapture(Action postRender)
+        void RenderCapture()
         {
             Dispatcher.Invoke(() =>
             {
@@ -145,52 +132,32 @@ namespace Prototype
                 if (session.Focus.Capture != null)
                 {
                     var capture = session.Focus.Capture.Image;
-
+                    
                     if (session.Focus.Boost != 1)
                     {
                         capture = capture.Mul(capture, session.Focus.Boost);
                     }
-
-                    session.Camera.ChangeActualSize(capture.Height, capture.Width);
+                    
                     image.Source = capture.ToWriteableBitmap();
-
-                    RenderCaptureROI(session);
-
-                    postRender();
                 }
             });
         }
-
-        void RenderCaptureROI(Session session)
+        
+        void RenderCaptureROI()
         {
-            if (session.Focus.Capture != null && session.Focus.IsStarSelected)
+            var session = (Session)DataContext;
+            var roi = session.Focus.CaptureROI;
+
+            if (roi != null)
             {
-                var focus = session.Focus;
+                var capture = roi.Image;
 
-                var x1 = focus.SelectedStarVisibleX;
-                var y1 = focus.SelectedStarVisibleY;
-                var x2 = x1 + focus.SelectedStarVisibleWidth;
-                var y2 = y1 + focus.SelectedStarVisibleHeight;
-
-                if (x1 < 0 || y1 < 0 || x2 > focus.Capture.Image.Height || y2 > focus.Capture.Image.Width)
+                if (session.Focus.Boost != 1)
                 {
-                    selection.Source = null;
+                    capture = capture.Mul(capture, session.Focus.Boost);
                 }
-                else
-                {
-                    var rect = new OpenCvSharp.Rect((int)focus.SelectedStarVisibleY, (int)focus.SelectedStarVisibleX, (int)focus.SelectedStarVisibleHeight, (int)focus.SelectedStarVisibleWidth);
-                    var roi = new Mat((int)focus.SelectedStarVisibleHeight, (int)focus.SelectedStarVisibleWidth, MatType.CV_16SC1);
-                    var sub = new Mat(session.Focus.Capture.Image, rect);
-
-                    sub.CopyTo(roi);
-
-                    if (session.Focus.Boost != 1)
-                    {
-                        roi = roi.Mul(roi, session.Focus.Boost);
-                    }
-
-                    selection.Source = roi.ToWriteableBitmap();
-                }
+                
+                selection.Source = capture.ToWriteableBitmap();
             }
             else
             {
@@ -217,7 +184,7 @@ namespace Prototype
             var session = (Session)DataContext;
             
             var c = e.GetPosition(image);
-            var width = 20;
+            var width = 40;
             var width2 = width / 2;
 
             var x1 = c.X - width2;
@@ -226,29 +193,34 @@ namespace Prototype
             var y2 = c.Y + width2;
             
             session.SelectFocusStar((int)y1, (int)x1, (int)y2, (int)x2);
-
-            RenderCaptureROI(session);
         }
         
-        private void ReticleSelected(object sender, SelectionChangedEventArgs e)
-        {
-            var session = (Session)DataContext;
-
-            var item = reticle.SelectedValue as ComboBoxItem;
-
-            if(session != null && item != null)
-            {
-                var reticle = (ReticleType)Enum.Parse(typeof(ReticleType), item.Content.ToString());
-
-                session.Focus.ShowReticle(reticle);
-            }
-        }
-
         void ClearStarSelectionClick(object sender, RoutedEventArgs e)
         {
             var session = (Session)DataContext;
 
             session.Focus.ClearStarSelection();
+        }
+
+        void ResetStretchClick(object sender, RoutedEventArgs e)
+        {
+            var session = (Session)DataContext;
+
+            session.Focus.BoostChange(1.0);
+        }
+
+        void ReticleCrosshairsClick(object sender, RoutedEventArgs e)
+        {
+            var session = (Session)DataContext;
+
+            session.Focus.SetReticle(ReticleType.Crosshair);
+        }
+
+        void ReticleNoneClick(object sender, RoutedEventArgs e)
+        {
+            var session = (Session)DataContext;
+
+            session.Focus.SetReticle(ReticleType.None);
         }
     }
 }

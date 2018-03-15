@@ -117,6 +117,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Model\ImageView.cs" />
     <Compile Include="Stretch.xaml.cs">
       <DependentUpon>Stretch.xaml</DependentUpon>
     </Compile>

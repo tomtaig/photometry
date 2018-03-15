@@ -193,6 +193,83 @@ namespace Tests
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pixels"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="x1"></param>
+        /// <param name="y1"></param>
+        /// <param name="x2"></param>
+        /// <param name="y2"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ushort[][] GetSubImage(int copies, ushort[] pixels, int width, int height, int x1, int y1, int x2, int y2)
+        {
+            var result = new ushort[copies][];
+            var subWidth = (y2 - y1);
+            var yStep = width - subWidth;
+            var srcIndex = y1 * width + x1;
+            var dstIndex = 0;
+            
+            for (var c = 0; c< copies; c++)
+            {
+                result[c] = new ushort[(x2 - x1) * (y2 - y1)];
+            }
+
+            for (var y = y1; y < y2; y++)
+            {
+                for (var i = x1; i < x2; i++)
+                {
+                    for (var c = 0; c < copies; c++)
+                    {
+                        result[c][dstIndex] = pixels[srcIndex];
+                    }
+
+                    dstIndex++;
+                    srcIndex++;
+                }
+                
+                srcIndex += yStep;
+            }
+
+            return result;
+        }
+
+        public static double FindMean(ushort[] image)
+        {
+            var result = 0.0;
+
+            for (var i = 0; i < image.Length; i++)
+            {
+                result += image[i];
+            }
+
+            return result / image.Length;
+        }
+
+        public static double FindStandardDeviation(ushort[] image)
+        {
+            var mean = 0.0;
+
+            foreach (var pixel in image)
+            {
+                mean += pixel;
+            }
+
+            mean /= image.Length;
+
+            var deviation = 0.0;
+
+            foreach (var pixel in image)
+            {
+                deviation += (pixel - mean) * (pixel - mean);
+            }
+
+            return Math.Sqrt(deviation / (image.Length - 1));
+        }
+
+        /// <summary>
         /// Calculate the slope towards Gaussian function parameters that produce less error
         /// </summary>
         /// <param name="peak"></param>
@@ -471,6 +548,68 @@ namespace Tests
             return results;
         }
 
+        public static ushort[] MedianBoxFilter(ushort[] pixels, int xSize, int ySize)
+        {
+            var result = new ushort[pixels.Length];
+            var samples = new ushort[9];
+            var rows = new int[3];
+
+            rows[0] = 0;
+            rows[1] = xSize;
+            rows[2] = 2 * xSize;
+
+            for (var y = 0; y < ySize - 2; y++)
+            {
+                for (var x = 0; x < xSize - 2; x++)
+                {
+                    samples[0] = pixels[rows[0] + x];
+                    samples[1] = pixels[rows[0] + x + 1];
+                    samples[2] = pixels[rows[0] + x + 2];
+
+                    samples[3] = pixels[rows[1] + x];
+                    samples[4] = pixels[rows[1] + x + 1];
+                    samples[5] = pixels[rows[1] + x + 2];
+
+                    samples[6] = pixels[rows[2] + x];
+                    samples[7] = pixels[rows[2] + x + 1];
+                    samples[8] = pixels[rows[2] + x + 2];
+
+                    Array.Sort<ushort>(samples);
+
+                    result[rows[1] + x + 1] = samples[4];
+                }
+
+                rows[0] += xSize;
+                rows[1] += xSize;
+                rows[2] += xSize;
+            }
+
+            return result;
+        }
+
+        public static StarCenter FindCenterOfMass(ushort[] pixels, int xSize, int ySize)
+        {
+            var x = 0.0;
+            var y = 0.0;
+            var i = 0;
+            var total = 0.0;
+
+            for (var yp = 0; yp < ySize; yp++)
+            {
+                for (var xp = 0; xp < xSize; xp++)
+                {
+                    var mass = (double)pixels[i++];
+
+                    total += mass;
+
+                    x += xp * mass;
+                    y += yp * mass;
+                }
+            }
+
+            return new StarCenter { X = x / total, Y = y / total };
+        }
+
         /// <summary>
         /// Subtract a whole image by a given value
         /// </summary>
@@ -490,13 +629,29 @@ namespace Tests
         }
 
         /// <summary>
+        /// Subtract a whole image by a given value
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="offset"></param>
+        public static void Subtract(ushort[] image, ushort offset)
+        {
+            for (var i=0; i<image.Length; i++)
+            {
+                var value = image[i] - offset;
+
+                image[i] = value > 0 ? (ushort)value : (ushort)0;
+            }
+        }
+
+        /// <summary>
         /// Find the mean background value for an image
         /// </summary>
         /// <param name="image">The image</param>
         /// <returns>Mean background value</returns>
-        public static double FindSkyBackgroundIntensity(ushort[] image)
+        public static double FindSkyBackgroundIntensity(ushort[] image, double sigma = 2.0, int iterations = 15)
         {
-            var background = KappaSigmaClip(image, 3.0, 5);
+            var background = KappaSigmaClip(image, sigma, iterations);
+
             var mean = 0.0;
 
             for (var y = 0; y < image.Length; y++)

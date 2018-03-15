@@ -10,7 +10,10 @@ namespace Prototype.Model
         public int ChipY { get; set; }
         public int BinnedX { get; set; }
         public int BinnedY { get; set; }
+        public int XSize { get; set; }
+        public int YSize { get; set; }
         public Mat Image { get; set; }
+        public ushort[] ImageArray { get; set; }
 
         public class SubFrame
         {

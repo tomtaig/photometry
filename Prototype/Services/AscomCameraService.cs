@@ -293,9 +293,9 @@ namespace Prototype.Services
             return OperationResult.Ok;
         }
 
-        public unsafe Task<Mat> Capture(double exposure)
+        public unsafe Task<ImageView> Capture(double exposure)
         {
-            return new Task<Mat>(() =>
+            return new Task<ImageView>(() =>
             {
                 _camera.StartExposure(exposure, true);
 
@@ -317,9 +317,7 @@ namespace Prototype.Services
                         pixels[i] = (ushort)img[i];
                     }
 
-                    var mat = new Mat(xSize, ySize, MatType.CV_16UC1, pixels);
-
-                    return mat;
+                    return new ImageView { XSize = xSize, YSize = ySize, Image = pixels };
                 }
             });
         }

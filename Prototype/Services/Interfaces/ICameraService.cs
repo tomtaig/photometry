@@ -21,7 +21,7 @@ namespace Prototype.Services.Interfaces
         OperationResult SetBinXY(int xy);
         OperationResult SetBinY(int y);
         OperationResult SetBinX(int x);
-        Task<Mat> Capture(double exposure);
+        Task<ImageView> Capture(double exposure);
         OperationResult SetRegion(int subFrameX, int subFrameY, int subFrameWidth, int subFrameHeight);
         OperationResult ClearRegion();
     }

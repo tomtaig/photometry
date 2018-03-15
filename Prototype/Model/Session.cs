@@ -9,6 +9,7 @@ using System.Windows;
 using System.Collections.Generic;
 using OpenCvSharp;
 using System.Windows.Media.Imaging;
+using Tests;
 
 namespace Prototype
 {
@@ -75,6 +76,11 @@ namespace Prototype
         public void SelectFocusStar(int x1, int y1, int x2, int y2)
         {
             Focus.SetStarSelection(x1, y1, x2, y2);
+
+            if(Focus.Capture != null)
+            {
+                CaptureROI();
+            }
         }
 
         public void ChangeBinX(int x)
@@ -124,7 +130,7 @@ namespace Prototype
             Focus.ExposureChange(min, sec, msec);
         }
         
-        public void Capture(Action<Mat> success)
+        public void Capture()
         {
             Focus.StartCapturing();
 
@@ -147,11 +153,43 @@ namespace Prototype
             {
                 if(x.Status == TaskStatus.RanToCompletion)
                 {
-                    success(x.Result);
+                    var result = x.Result;
+
+                    var capture = new CaptureView
+                    {
+                        BinnedX = Camera.BinnedX,
+                        BinnedY = Camera.BinnedY,
+                        ChipX = Camera.UnbinnedX,
+                        ChipY = Camera.UnbinnedY,
+                        XSize = result.XSize,
+                        YSize = result.YSize
+                    };
+
+                    if (Camera.IsSubFrameActive)
+                    {
+                        capture.Frame = new CaptureView.SubFrame
+                        {
+                            ChipX1 = Camera.SubFrameX,
+                            ChipY1 = Camera.SubFrameY,
+                            ChipX2 = Camera.SubFrameX + Camera.SubFrameWidth,
+                            ChipY2 = Camera.SubFrameY + Camera.SubFrameHeight
+                        };
+                    }
+
+                    capture.ImageArray = result.Image;
+                    capture.Image = new Mat(capture.XSize, capture.YSize, MatType.CV_16UC1, result.Image);
+
+                    Focus.SetCapture(capture);
+
+                    Camera.ChangeActualSize(capture.GetWidth(), capture.GetHeight());
+
+                    CaptureROI();
+
+                    Focus.FrameChanged();
 
                     if (Focus.IsLoopingCapture)
                     {
-                        Capture(success);
+                        Capture();
                     }
                     else
                     {
@@ -165,6 +203,130 @@ namespace Prototype
             });
 
             task.Start();
+        }
+
+        void CaptureROI()
+        {
+            if (Focus.Capture != null && Focus.IsStarSelected)
+            {
+                var x1 = Focus.SelectedStarVisibleX;
+                var y1 = Focus.SelectedStarVisibleY;
+                var x2 = x1 + Focus.SelectedStarVisibleWidth;
+                var y2 = y1 + Focus.SelectedStarVisibleHeight;
+
+                if (x1 < 0 || y1 < 0 || x2 > Focus.Capture.Image.Height || y2 > Focus.Capture.Image.Width)
+                {
+                    Focus.CaptureROI = null;
+
+                    Focus.RoiFrameChanged();
+                }
+                else
+                {
+                    var xSize = Focus.SelectedStarVisibleWidth;
+                    var ySize = Focus.SelectedStarVisibleHeight;
+
+                    var sub = Photometry.GetSubImage(2,
+                        Focus.Capture.ImageArray,
+                        Focus.Capture.YSize,
+                        Focus.Capture.XSize,
+                        Focus.SelectedStarVisibleY,
+                        Focus.SelectedStarVisibleX,
+                        Focus.SelectedStarVisibleY + xSize,
+                        Focus.SelectedStarVisibleX + ySize);
+                    
+                    var bgPixels = Photometry.KappaSigmaClip(sub[0], 5.0, 10);
+                    var background = new ushort[bgPixels.Count];
+                    var signal = new ushort[sub[0].Length - bgPixels.Count];
+                    var n = 0;
+                    var m = 0;
+
+                    for (var i = 0; i < sub[0].Length; i++)
+                    {
+                        if (bgPixels.Contains(i))
+                        {
+                            background[n++] = sub[0][i];
+                        }
+                        else
+                        {
+                            signal[m++] = sub[0][i];
+                        }
+                    }
+
+                    Focus.SetStarSignalPixels(m);
+
+                    if (m < 5)
+                    {
+                        // no star!
+                    }
+                    else
+                    {
+                        var mean = Photometry.FindMean(sub[0]);
+                        var sigma = Photometry.FindStandardDeviation(background);
+                        var bgMean = Photometry.FindMean(background);
+
+                        Focus.SetStarSNR(mean / sigma);
+
+                        Photometry.Subtract(sub[0], (ushort)mean);
+
+                        sub[0] = Photometry.MedianBoxFilter(sub[0], xSize, ySize);
+
+                        var brightestX = 0;
+                        var brightestY = 0;
+                        var br = 0;
+
+                        for (var y = 0; y < ySize; y++)
+                        {
+                            for (var x = 0; x < xSize; x++)
+                            {
+                                var brightest = brightestY * xSize + brightestX;
+
+                                if (sub[0][brightest] < sub[0][y * xSize + x])
+                                {
+                                    brightestX = x;
+                                    brightestY = y;
+                                    br = sub[0][brightest];
+                                }
+                            }
+                        }
+
+                        var center = Photometry.FindCenterOfMass(sub[0], xSize, ySize);
+
+                        ushort peak = 0;
+
+                        for (var i = 0; i < sub[1].Length; i++)
+                        {
+                            if (sub[1][i] > peak) peak = sub[1][i];
+                        }
+
+                        Focus.SetStarPeak(peak);
+                        Focus.SetStarBackgroundMean(bgMean);
+                        Focus.SetStarBackgroundSigma(sigma);
+                        Focus.SetStarCenter((center.X / (double)xSize) * 100.0, (center.Y / (double)ySize) * 100.0);
+                        Focus.SetStarBrightestCenter((brightestX / (double)xSize) * 100.0, (brightestY / (double)ySize) * 100.0);
+
+                        var samples = new ushort[40];
+                        var max = 0.0;
+
+                        for (var x = 0; x < 40; x++)
+                        {
+                            samples[x] = sub[0][(int)center.Y * 40 + x];
+                            max = samples[x] > max ? samples[x] : max;
+                        }
+
+                        Focus.SetProfileSamples(samples);
+                    }
+
+                    Focus.CaptureROI = new CaptureView
+                    {
+                        XSize = xSize,
+                        YSize = ySize,
+                        ImageArray = sub[0],
+                        Image = new Mat(ySize, xSize, MatType.CV_16UC1, sub[0])
+                    };
+
+                    Focus.RoiFrameChanged();
+                }
+            }
         }
 
         public void ChangeBinXY(int xy)
@@ -269,8 +431,7 @@ namespace Prototype
                 StartMonitorCoolingTask();
                 ExposureChange(Focus.ExposureMinute, Focus.ExposureSecond, Focus.ExposureMillisecond);
             }
-
-
+            
             return result;
         }
 
@@ -357,8 +518,7 @@ namespace Prototype
             {
                 Cooler.TurnOn();
 
-                double? target;
-                result = CameraService.GetTargetTemperature(out target);
+                result = CameraService.GetTargetTemperature(out double? target);
 
                 if (!result.IsError)
                 {

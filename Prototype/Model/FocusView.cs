@@ -32,7 +32,7 @@ namespace Prototype.Model
         public Visibility SubFrameSelectVisibility => IsSubFrameActive ? Visibility.Visible : Visibility.Collapsed;
         public Visibility StartCaptureLoopVisibility => !IsLoopingCapture ? Visibility.Visible : Visibility.Collapsed;
         public Visibility StopCaptureLoopVisibility => IsLoopingCapture && IsCapturing ? Visibility.Visible : Visibility.Collapsed;
-
+        
         public bool IsCaptureEnabled => !IsCapturing;
 
         public double Exposure { get; set; }
@@ -60,11 +60,14 @@ namespace Prototype.Model
         public double SubFrameSelectAreaWidth { get; set; }
         public double SubFrameSelectAreaHeight { get; set; }
         public double Zoom { get; set; } = 1;
-        public double ZoomSlider { get; set; } = 5;
+        public double ZoomSlider { get; set; } = 100;
         public double SubFrameSelectionThickness { get; set; }
         public bool IsSubFrameActive { get; set; }
         public ReticleType SelectedReticle { get; set; }
         public CaptureView Capture { get; set; }
+        public CaptureView CaptureROI { get; set; }
+        public double ZoomedWidth { get; set; }
+        public double ZoomedHeight { get; set; }
         public int SelectedStarVisibleX { get; set; }
         public int SelectedStarVisibleY { get; set; }
         public int SelectedStarVisibleWidth { get; set; }
@@ -73,41 +76,29 @@ namespace Prototype.Model
         public double SelectedStarZoomedY { get; set; }
         public double SelectedStarZoomedWidth { get; set; }
         public double SelectedStarZoomedHeight { get; set; }
-        public double ZoomedWidth { get; set; }
-        public double ZoomedHeight { get; set; }
+        public double SelectedStarCenterX { get; set; }
+        public double SelectedStarCenterY { get; set; }
+        public double SelectedStarBrightestX { get; set; }
+        public double SelectedStarBrightestY { get; set; }
         public int SelectedStarChipX1 { get; set; }
         public int SelectedStarChipY1 { get; set; }
         public int SelectedStarChipX2 { get; set; }
         public int SelectedStarChipY2 { get; set; }
+        public double SelectedStarSNR { get; set; }
+        public ushort SelectedStarPeak { get; set; }
+        public double SelectedStarBackgroundMean { get; set; }
+        public double SelectedStarBackgroundSigma { get; set; }
+        public int SelectedStarSignalPixels { get; set; }
+
+        public Action FrameChanged { get; set; }
+        public Action RoiFrameChanged { get; set; }
 
         CameraView _camera;
 
         public FocusView()
         {   
             var samples = new ObservableCollection<DataPoint>();
-
-            samples.Add(new DataPoint(-10, PlotGaussian(-10.1)));
-            samples.Add(new DataPoint(-9, PlotGaussian(-9.5)));
-            samples.Add(new DataPoint(-8, PlotGaussian(-7.8)));
-            samples.Add(new DataPoint(-7, PlotGaussian(-7.4)));
-            samples.Add(new DataPoint(-6, PlotGaussian(-6.1)));
-            samples.Add(new DataPoint(-5, PlotGaussian(-5.5)));
-            samples.Add(new DataPoint(-4, PlotGaussian(-3.6)));
-            samples.Add(new DataPoint(-3, PlotGaussian(-2.5)));
-            samples.Add(new DataPoint(-2, PlotGaussian(-2)));
-            samples.Add(new DataPoint(-1, PlotGaussian(-1)));
-            samples.Add(new DataPoint(+0, PlotGaussian(+.01)));
-            samples.Add(new DataPoint(+1, PlotGaussian(+1.3)));
-            samples.Add(new DataPoint(+2, PlotGaussian(+2.5)));
-            samples.Add(new DataPoint(+3, PlotGaussian(+3.1)));
-            samples.Add(new DataPoint(+4, PlotGaussian(+3.9)));
-            samples.Add(new DataPoint(+5, PlotGaussian(+4.8)));
-            samples.Add(new DataPoint(+6, PlotGaussian(+5.8)));
-            samples.Add(new DataPoint(+7, PlotGaussian(+6.6)));
-            samples.Add(new DataPoint(+8, PlotGaussian(+8.4)));
-            samples.Add(new DataPoint(+9, PlotGaussian(+9.5)));
-            samples.Add(new DataPoint(+10, PlotGaussian(+10)));
-
+            
             ProfileSamples = samples;
 
             MeasurementCategories = new ObservableCollection<string>();
@@ -169,6 +160,20 @@ namespace Prototype.Model
                 camera.SubFrameHeight * yratio);
         }
 
+        public void SetStarBackgroundMean(double background)
+        {
+            SelectedStarBackgroundMean = background;
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarBackgroundMean)));
+        }
+
+        public void SetStarBackgroundSigma(double sigma)
+        {
+            SelectedStarBackgroundSigma = sigma;
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarBackgroundSigma)));
+        }
+
         public void StartCapturing()
         {
             IsCapturing = true;
@@ -178,6 +183,13 @@ namespace Prototype.Model
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsCaptureEnabled)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StopCaptureLoopVisibility)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StartCaptureLoopVisibility)));
+        }
+
+        public void SetStarSignalPixels(int pixels)
+        {
+            SelectedStarSignalPixels = pixels;
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarSignalPixels)));
         }
 
         public void StopCapturing()
@@ -216,12 +228,44 @@ namespace Prototype.Model
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StartCaptureLoopVisibility)));
         }
 
-        public void ShowReticle(ReticleType reticle)
+        public void SetReticle(ReticleType reticle)
         {
             SelectedReticle = reticle;
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedReticle)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CrosshairReticleVisibility)));
+        }
+
+        public void SetStarSNR(double snr)
+        {
+            SelectedStarSNR = snr;
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarSNR)));
+        }
+
+        public void SetStarPeak(ushort peak)
+        {
+            SelectedStarPeak = peak;
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarPeak)));
+        }
+        
+        public void SetStarCenter(double x, double y)
+        {
+            SelectedStarCenterX = x;
+            SelectedStarCenterY = y;
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarCenterX)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarCenterY)));
+        }
+
+        public void SetStarBrightestCenter(double x, double y)
+        {
+            SelectedStarBrightestX = x;
+            SelectedStarBrightestY = y;
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarBrightestX)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarBrightestY)));
         }
 
         public void SetCapture(CaptureView capture)
@@ -258,6 +302,8 @@ namespace Prototype.Model
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ZoomedWidth)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ZoomedHeight)));
             }
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Capture)));
         }
 
         private void SetZoomedProperties()
@@ -339,6 +385,20 @@ namespace Prototype.Model
             SetZoomedProperties();
         }
         
+        public void SetProfileSamples(ushort[] samples)
+        {
+            var latest = new ObservableCollection<DataPoint>();
+
+            for (var i=0; i<40; i++)
+            {
+                latest.Add(new DataPoint(i-20, samples[i]));
+            }
+
+            ProfileSamples = latest;
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ProfileSamples)));
+        }
+
         public void SetSubFrameSelectionThickness(double thickness)
         {
             SubFrameSelectionThickness = thickness;
@@ -418,7 +478,7 @@ namespace Prototype.Model
                 ZoomSlider = zoom.Value;
             }
 
-            Zoom = (ZoomSlider / 5);
+            Zoom = (ZoomSlider / 100.0);
 
             SetZoomedProperties();
 
