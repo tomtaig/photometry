@@ -182,8 +182,8 @@
                             <Grid IsHitTestVisible="False" Panel.ZIndex="100" Width="{Binding Focus.ZoomedX}" Height="{Binding Focus.ZoomedY}" HorizontalAlignment="Left" VerticalAlignment="Top">
                                 <Line Panel.ZIndex="100" Visibility="{Binding Focus.CrosshairReticleVisibility}" Fill="Red" Stroke="Red" StrokeThickness="1" X1="0" Y1="0" X2="{Binding Focus.ZoomedWidth}" Y2="{Binding Focus.ZoomedHeight}" />
                                 <Line Panel.ZIndex="100" Visibility="{Binding Focus.CrosshairReticleVisibility}" Fill="Red" Stroke="Red" StrokeThickness="1" X1="{Binding Focus.ZoomedWidth}" Y1="0" X2="0" Y2="{Binding Focus.ZoomedHeight}" />
-                                <Canvas Width="{Binding Focus.ZoomedX}" Height="{Binding Focus.ZoomedY}" Visibility="{Binding Focus.SelectedStarIndicatorVisibility}">
-                                    <Rectangle StrokeThickness="1" Stroke="LimeGreen" Canvas.Left="{Binding Focus.SelectedStarZoomedX}" Canvas.Top="{Binding Focus.SelectedStarZoomedY}" Width="{Binding Focus.SelectedStarZoomedWidth}" Height="{Binding Focus.SelectedStarZoomedHeight}" />
+                                <Canvas Width="{Binding Focus.ZoomedX}" Height="{Binding Focus.ZoomedY}" Visibility="{Binding Focus.Region.RegionVisibility}">
+                                    <Rectangle StrokeThickness="1" Stroke="LimeGreen" Canvas.Left="{Binding Focus.Region.ZoomedX}" Canvas.Top="{Binding Focus.Region.ZoomedY}" Width="{Binding Focus.Region.ZoomedWidth}" Height="{Binding Focus.Region.ZoomedHeight}" />
                                 </Canvas>
                             </Grid>
                         </Grid>
@@ -201,30 +201,28 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="120" />
                     <ColumnDefinition Width="140" />
-                    <ColumnDefinition Width="150" />
                     <ColumnDefinition Width="120" />
+                    <ColumnDefinition Width="150" />
+                    <ColumnDefinition Width="150" />
                     <ColumnDefinition Width="120" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Width="100" Height="100" Background="Black" BorderBrush="Black" Margin="0,10,0,10" BorderThickness="1">
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Text="Select a star" Visibility="{Binding Focus.StarSelectionPromptVisibility}" />
-                        <Grid>
-                            <Image Name="selection" Width="100" Height="100" Visibility="{Binding Focus.StarSelectionImageVisibility}" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
-                                <Image.LayoutTransform>
-                                    <TransformGroup>
-                                        <RotateTransform Angle="-90" />
-                                        <ScaleTransform ScaleX="1" ScaleY="-1" />
-                                    </TransformGroup>
-                                </Image.LayoutTransform>
-                            </Image>
-                            <Canvas IsHitTestVisible="False" Width="100" Height="100">
-                                <Rectangle Canvas.Left="{Binding Focus.SelectedStarBrightestY}" Canvas.Top="{Binding Focus.SelectedStarBrightestX}" Fill="Red" Width="5" Height="5" />
-                                <Rectangle Canvas.Left="{Binding Focus.SelectedStarCenterY}" Canvas.Top="{Binding Focus.SelectedStarCenterX}" Fill="Green" Width="5" Height="5" />
-                            </Canvas>
-                        </Grid>
-                    </StackPanel>
+                <Border Grid.Column="0" Width="100" Height="100" Visibility="{Binding Focus.StarSelectionStatsVisibility}" Background="Black" BorderBrush="Black" Margin="0,10,0,10" BorderThickness="1">
+                    <Grid>
+                        <Image Name="selection" Width="100" Height="100" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                            <Image.LayoutTransform>
+                                <TransformGroup>
+                                    <RotateTransform Angle="-90" />
+                                    <ScaleTransform ScaleX="1" ScaleY="-1" />
+                                </TransformGroup>
+                            </Image.LayoutTransform>
+                        </Image>
+                        <Canvas IsHitTestVisible="False" Width="100" Height="100" Visibility="{Binding Focus.Star.MeasurementsVisibility}">
+                            <Rectangle Canvas.Left="{Binding Focus.Star.BrightestY}" Canvas.Top="{Binding Focus.Star.BrightestX}" Fill="Red" Width="5" Height="5" />
+                            <Rectangle Canvas.Left="{Binding Focus.Star.CenterY}" Canvas.Top="{Binding Focus.Star.CenterX}" Fill="Green" Width="5" Height="5" />
+                        </Canvas>
+                    </Grid>
                 </Border>
 
                 <Grid Grid.Column="1" Margin="10" Height="100" Visibility="{Binding Focus.StarSelectionStatsVisibility}">
@@ -238,27 +236,44 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <Border Grid.Column="0" Grid.Row="0" BorderBrush="{StaticResource dashed}" BorderThickness="1,1,1,1">
+                    <Border Grid.Column="0" Grid.Row="0" BorderBrush="{StaticResource dashed}" BorderThickness="1,1,1,0">
                         <TextBlock Text="BG Mean" VerticalAlignment="Center" Padding="5,0,0,0" />
                     </Border>
-                    <Border Grid.Column="1" Grid.Row="0" BorderBrush="{StaticResource dashed}" BorderThickness="0,1,1,1">
-                        <TextBlock Text="{Binding Focus.SelectedStarBackgroundMean, StringFormat=N2}" VerticalAlignment="Center" Padding="5,0,0,0" />
+                    <Border Grid.Column="1" Grid.Row="0" BorderBrush="{StaticResource dashed}" BorderThickness="0,1,1,0">
+                        <TextBlock Text="{Binding Focus.Star.BackgroundMean, StringFormat=N2}" VerticalAlignment="Center" Padding="5,0,0,0" />
                     </Border>
-                    <Border Grid.Column="0" Grid.Row="1" BorderBrush="{StaticResource dashed}" BorderThickness="1,1,1,1">
+                    <Border Grid.Column="0" Grid.Row="1" BorderBrush="{StaticResource dashed}" BorderThickness="1,1,1,0">
                         <TextBlock Text="BG Sigma" VerticalAlignment="Center" Padding="5,0,0,0" />
                     </Border>
-                    <Border Grid.Column="1" Grid.Row="1" BorderBrush="{StaticResource dashed}" BorderThickness="0,1,1,1">
-                        <TextBlock Text="{Binding Focus.SelectedStarBackgroundSigma, StringFormat=N2}" VerticalAlignment="Center" Padding="5,0,0,0" />
+                    <Border Grid.Column="1" Grid.Row="1" BorderBrush="{StaticResource dashed}" BorderThickness="0,1,1,0">
+                        <TextBlock Text="{Binding Focus.Star.BackgroundSigma, StringFormat=N2}" VerticalAlignment="Center" Padding="5,0,0,0" />
                     </Border>
-                    <Border Grid.Column="0" Grid.Row="2" BorderBrush="{StaticResource dashed}" BorderThickness="1,1,1,1">
+                    <Border Grid.Column="0" Grid.Row="2" BorderBrush="{StaticResource dashed}" BorderThickness="1,1,1,0">
                         <TextBlock Text="Signal #" VerticalAlignment="Center" Padding="5,0,0,0" />
                     </Border>
-                    <Border Grid.Column="1" Grid.Row="2" BorderBrush="{StaticResource dashed}" BorderThickness="0,1,1,1">
-                        <TextBlock Text="{Binding Focus.SelectedStarSignalPixels}" VerticalAlignment="Center" Padding="5,0,0,0" />
+                    <Border Grid.Column="1" Grid.Row="2" BorderBrush="{StaticResource dashed}" BorderThickness="0,1,1,0">
+                        <TextBlock Text="{Binding Focus.Star.Signals}" VerticalAlignment="Center" Padding="5,0,0,0" />
                     </Border>
+                    <Button Grid.Row="3" Grid.ColumnSpan="2" Content="Clear" Click="ClearStarSelectionClick" />
                 </Grid>
+
+                <oxy:Plot Name="starprofile" Grid.Column="2" Visibility="{Binding Focus.Star.MeasurementsVisibility}" PlotAreaBorderColor="LightGray" PlotMargins="0" Margin="10" Padding="1" Width="100" Height="100">
+                    <oxy:Plot.Axes>
+                        <oxy:LinearAxis Position="Left"
+                                    MajorTickSize="0" MinorTickSize="0" TextColor="Transparent" MaximumPadding=".2" MinimumPadding=".2"
+                                    MinorGridlineStyle="Dot" MinorGridlineThickness="1" MinorGridlineColor="LightGray"
+                                    MajorGridlineColor="LightGray" MajorGridlineThickness="1" MajorGridlineStyle="Dot" />
+                        <oxy:LinearAxis Position="Bottom" MajorTickSize="0" MinorTickSize="0" TickStyle="None" 
+                                    MinorGridlineStyle="Dot" MinorGridlineThickness="1" MinorGridlineColor="LightGray"
+                                    MajorGridlineColor="LightGray" MajorGridlineThickness="1" MajorGridlineStyle="Dot" TextColor="Transparent" />
+                    </oxy:Plot.Axes>
+                    <oxy:Plot.Series>
+                        <oxy:LineSeries Color="Transparent" MarkerStroke="Black" MarkerSize="1" MarkerType="Square" MarkerStrokeThickness="1" ItemsSource="{Binding Focus.ProfileSamples}" />
+                        <controls:GaussianSeries Amplitude="{Binding Focus.FittedAmplitude}" Sigma="{Binding Focus.FittedSigma}" Center="{Binding Focus.FittedCenter}" Offset="{Binding Focus.FittedOffset}" />
+                    </oxy:Plot.Series>
+                </oxy:Plot>
                 
-                <Grid Grid.Column="2" Margin="10" Height="100" Visibility="{Binding Focus.StarSelectionStatsVisibility}">
+                <Grid Grid.Column="3" Margin="10" Height="100" Visibility="{Binding Focus.Star.MeasurementsVisibility}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="50" />
                         <ColumnDefinition Width="80" />
@@ -273,52 +288,35 @@
                         <TextBlock Text="Peak" VerticalAlignment="Center" Padding="5,0,0,0" />
                     </Border>
                     <Border Grid.Column="1" Grid.Row="0" BorderBrush="{StaticResource dashed}" BorderThickness="0,1,1,1">
-                        <TextBlock Text="{Binding Focus.SelectedStarPeak}" VerticalAlignment="Center" Padding="5,0,0,0" />
+                        <TextBlock Text="{Binding Focus.Star.Peak}" VerticalAlignment="Center" Padding="5,0,0,0" />
                     </Border>
                     <Border Grid.Column="0" Grid.Row="1" BorderBrush="{StaticResource dashed}" BorderThickness="1,0,1,0">
                         <TextBlock Text="SNR" VerticalAlignment="Center" Padding="5,0,0,0" />
                     </Border>
                     <Border Grid.Column="1" Grid.Row="1" BorderBrush="{StaticResource dashed}" BorderThickness="0,0,1,0">
-                        <TextBlock Text="{Binding Focus.SelectedStarSNR, StringFormat=N2}" VerticalAlignment="Center" Padding="5,0,0,0" />
+                        <TextBlock Text="{Binding Focus.Star.SignalNoiseRatio, StringFormat=N2}" VerticalAlignment="Center" Padding="5,0,0,0" />
                     </Border>
-                    <Border Grid.Column="0" Grid.Row="2" BorderBrush="{StaticResource dashed}" BorderThickness="1">
+                    <Border Grid.Column="0" Grid.Row="2" BorderBrush="{StaticResource dashed}" BorderThickness="1,1,1,0">
                         <TextBlock Text="Center" VerticalAlignment="Center" Padding="5,0,0,0" />
                     </Border>
-                    <Border Grid.Column="1" Grid.Row="2" BorderBrush="{StaticResource dashed}" BorderThickness="0,1,1,1">
+                    <Border Grid.Column="1" Grid.Row="2" BorderBrush="{StaticResource dashed}" BorderThickness="0,1,1,0">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Focus.SelectedStarCenterX, StringFormat=N2}" VerticalAlignment="Center" Padding="5,0,0,0" />
-                            <TextBlock Text="{Binding Focus.SelectedStarCenterY, StringFormat=N2}" VerticalAlignment="Center" Padding="5,0,0,0" />
+                            <TextBlock Text="{Binding Focus.Star.CenterX, StringFormat=N2}" VerticalAlignment="Center" Padding="5,0,0,0" />
+                            <TextBlock Text="{Binding Focus.Star.CenterY, StringFormat=N2}" VerticalAlignment="Center" Padding="5,0,0,0" />
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="0" Grid.Row="3" BorderBrush="{StaticResource dashed}" BorderThickness="1">
-                        <TextBlock Text="Quality" VerticalAlignment="Center" Padding="5,0,0,0" />
+                        <TextBlock Text="Sigma" VerticalAlignment="Center" Padding="5,0,0,0" />
                     </Border>
                     <Border Grid.Column="1" Grid.Row="3" BorderBrush="{StaticResource dashed}" BorderThickness="0,1,1,1">
-                        <TextBlock Text="-" VerticalAlignment="Center" Padding="5,0,0,0" />
+                        <TextBlock Text="{Binding Focus.FittedSigma}" VerticalAlignment="Center" Padding="5,0,0,0" />
                     </Border>
-                    <Button Grid.Row="3" Grid.ColumnSpan="2" Content="Clear" Click="ClearStarSelectionClick" />
                 </Grid>
 
-                <oxy:Plot Grid.Column="3" Visibility="{Binding Focus.StarFittingGraphVisibility}" PlotAreaBorderColor="LightGray" PlotMargins="0" Margin="10" Padding="1" Width="100" Height="100">
-                    <oxy:Plot.Axes>
-                        <oxy:LinearAxis Position="Left"
-                                    MajorTickSize="0" MinorTickSize="0" TextColor="Transparent" MaximumPadding=".2" MinimumPadding=".2"
-                                    MinorGridlineStyle="Dot" MinorGridlineThickness="1" MinorGridlineColor="LightGray"
-                                    MajorGridlineColor="LightGray" MajorGridlineThickness="1" MajorGridlineStyle="Dot" />
-                        <oxy:LinearAxis Position="Bottom" MajorTickSize="0" MinorTickSize="0" TickStyle="None" 
-                                    MinorGridlineStyle="Dot" MinorGridlineThickness="1" MinorGridlineColor="LightGray"
-                                    MajorGridlineColor="LightGray" MajorGridlineThickness="1" MajorGridlineStyle="Dot" TextColor="Transparent" />
-                    </oxy:Plot.Axes>
-                    <oxy:Plot.Series>
-                        <oxy:LineSeries Color="Transparent" MarkerStroke="Black" MarkerSize="1" MarkerType="Square" MarkerStrokeThickness="1" ItemsSource="{Binding Focus.ProfileSamples}" />
-                        <!--<controls:GaussianSeries Amplitude="{Binding Focus.FittedAmplitude}" Sigma="{Binding Focus.FittedSigma}" Center="{Binding Focus.FittedCenter}" Offset="{Binding Focus.FittedOffset}" />-->
-                    </oxy:Plot.Series>
-                </oxy:Plot>
-
-                <Grid Grid.Column="4" Margin="10" Height="100" Visibility="{Binding Focus.StarFittingStatsVisibility}">
+                <Grid Grid.Column="4" Margin="10" Height="100" Visibility="{Binding Focus.Star.MeasurementsVisibility}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="50" />
-                        <ColumnDefinition Width="50" />
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="20" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
@@ -326,26 +324,26 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions> 
                     <Border Grid.Column="0" Grid.Row="0" BorderBrush="{StaticResource dashed}" BorderThickness="1">
-                        <TextBlock Text="FWHM" VerticalAlignment="Center" Padding="5,0,0,0" />
+                        <TextBlock Text="Median Filter" VerticalAlignment="Center" Padding="5,0,0,0" />
                     </Border>
                     <Border Grid.Column="1" Grid.Row="0" BorderBrush="{StaticResource dashed}" BorderThickness="0,1,1,1">
-                        <TextBlock Text="-" VerticalAlignment="Center" Padding="5,0,0,0" />
+                        <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding Focus.UseMedianFilter}" />
                     </Border>
                     <Border Grid.Column="0" Grid.Row="1" BorderBrush="{StaticResource dashed}" BorderThickness="1,0,1,0">
-                        <TextBlock Text="Best" VerticalAlignment="Center" Padding="5,0,0,0" />
+                        <TextBlock Text="PHD BG Formula" VerticalAlignment="Center" Padding="5,0,0,0" />
                     </Border>
                     <Border Grid.Column="1" Grid.Row="1" BorderBrush="{StaticResource dashed}" BorderThickness="0,0,1,0">
-                        <TextBlock Text="-" VerticalAlignment="Center" Padding="5,0,0,0" />
+                        <CheckBox VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding Focus.UsePhdBackgroundFormula}" />
                     </Border>
                     <Border Grid.Column="0" Grid.Row="2" BorderBrush="{StaticResource dashed}" BorderThickness="1">
-                        <TextBlock Text="Error" VerticalAlignment="Center" Padding="5,0,0,0" />
+                        <TextBlock Text="Weighted Centroid" VerticalAlignment="Center" Padding="5,0,0,0" />
                     </Border>
                     <Border Grid.Column="1" Grid.Row="2" BorderBrush="{StaticResource dashed}" BorderThickness="0,1,1,1">
-                        <TextBlock Text="-" VerticalAlignment="Center" Padding="5,0,0,0" />
+                        
                     </Border>
                 </Grid>
 
-                <ScrollViewer Name="measureScroll" Visibility="{Binding Focus.StarFocusGraphVisibility}" Grid.Column="5" Margin="0" Padding="0" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Hidden">
+                <ScrollViewer Name="measureScroll" Visibility="{Binding Focus.Star.MeasurementsVisibility}" Grid.Column="6" Margin="0" Padding="0" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Hidden">
                     <oxy:Plot PlotMargins="0" Margin="15,10,0,10" Padding="1" MinWidth="800" Height="100" PlotType="XY" PlotAreaBorderColor="LightGray">
                         <oxy:Plot.Axes>
                             <oxy:CategoryAxis Position="Bottom" MajorStep="5" MinorStep="2.5" GapWidth="0" 
@@ -358,7 +356,7 @@
                         </oxy:Plot.Axes>
                         <oxy:Plot.Series>
                             <oxy:ColumnSeries Name="measurements" ItemsSource="{Binding Focus.Measurements}" Margin="0" Padding="0"
-                                          LabelPlacement="Outside" Color="Black" FillColor="LightGreen" StrokeColor="Black" StrokeThickness="1" />
+                                LabelPlacement="Outside" Color="Black" FillColor="LightGreen" StrokeColor="Black" StrokeThickness="1" />
                         </oxy:Plot.Series>
                     </oxy:Plot>
                 </ScrollViewer>

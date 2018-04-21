@@ -65,7 +65,7 @@ namespace Prototype
 
             if (session != null)
             {
-                session.Focus.ZoomChange(null);
+                session.Focus.SetZoom(null);
             }
         }
 
@@ -101,9 +101,9 @@ namespace Prototype
                 Dispatcher.Invoke(() => RenderCapture());
             }));
 
-            session.Focus.RoiFrameChanged = (new Action(() =>
+            session.Focus.RegionChanged = (new Action(() =>
             {
-                Dispatcher.Invoke(() => RenderCaptureROI());
+                Dispatcher.Invoke(() => RenderRegion());
             }));
 
             session.Capture();
@@ -118,8 +118,7 @@ namespace Prototype
                 session.Focus.BoostChange(null);
 
                 RenderCapture();
-
-                RenderCaptureROI();
+                RenderRegion();
             }
         }
 
@@ -142,21 +141,21 @@ namespace Prototype
                 }
             });
         }
-        
-        void RenderCaptureROI()
+
+        void RenderRegion()
         {
             var session = (Session)DataContext;
-            var roi = session.Focus.CaptureROI;
+            var region = session.Focus.Region;
 
-            if (roi != null)
+            if (region.Capture != null)
             {
-                var capture = roi.Image;
+                var capture = region.Capture.Image;
 
                 if (session.Focus.Boost != 1)
                 {
                     capture = capture.Mul(capture, session.Focus.Boost);
                 }
-                
+
                 selection.Source = capture.ToWriteableBitmap();
             }
             else

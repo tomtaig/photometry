@@ -1,5 +1,4 @@
-﻿using System;
-using OpenCvSharp;
+﻿using OpenCvSharp;
 
 namespace Prototype.Model
 {
@@ -14,15 +13,7 @@ namespace Prototype.Model
         public int YSize { get; set; }
         public Mat Image { get; set; }
         public ushort[] ImageArray { get; set; }
-
-        public class SubFrame
-        {
-            public int ChipX1 { get; set; }
-            public int ChipY1 { get; set; }
-            public int ChipX2 { get; set; }
-            public int ChipY2 { get; set; }
-        }
-
+        
         public Point2i GetVisiblePositionFromChipPosition(double x, double y)
         {
             if(Frame != null)

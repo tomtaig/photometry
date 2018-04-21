@@ -42,7 +42,7 @@ namespace Prototype.Controls
             var series = (OxyPlot.Series.LineSeries)base.CreateModel();
             var points = new ObservableCollection<DataPoint>();
 
-            for(var i = -10.0; i < 10.0; i+=0.02)
+            for(var i = -20.0; i < 20.0; i+=0.02)
             {
                 points.Add(new DataPoint(i, PlotGaussian(i)));
             }

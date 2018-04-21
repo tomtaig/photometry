@@ -1,7 +1,6 @@
 ﻿using OpenCvSharp;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -126,7 +125,43 @@ namespace Tests
                 Result = iterations == options.MaxIterations ? GaussianFitResult.IterationsMaxed : GaussianFitResult.StepMinimumReached
             };
         }
-        
+
+        public static GaussianFit FindGaussianPSF(ushort[] samples, double peak, double center, GaussianFitOptions2 options)
+        {
+            var width = 1.0;
+            var widthStep = 1.0;
+            var iterations = 0;
+            
+            for (iterations = 0; iterations < options.MaxIterations && Math.Abs(widthStep) > options.MinimumChangeThreshold; iterations++)
+            {
+                var direction = GradientTowardsMinimalErrorForGaussian(peak, width, samples, center, options);
+                widthStep = options.IterationStepSize * direction[0];                
+                width = width + widthStep;
+               
+                if (width < .1)
+                {
+                    return new GaussianFit { Result = GaussianFitResult.Error };
+                }
+                else if (width > 20)
+                {
+                    return new GaussianFit { Result = GaussianFitResult.Error };
+                }
+
+                if(peak < 0)
+                {
+                    return new GaussianFit { Result = GaussianFitResult.Error };
+                }
+            }
+
+            return new GaussianFit
+            {
+                Width = width,
+                Peak = peak,
+                Iterations = iterations,
+                Result = iterations == options.MaxIterations ? GaussianFitResult.IterationsMaxed : GaussianFitResult.StepMinimumReached
+            };
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -314,7 +349,59 @@ namespace Tests
             
             return vec;
         }
-        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double[] GradientTowardsMinimalErrorForGaussian(double peak, double sigma, ushort[] samples, double center, GaussianFitOptions2 options)
+        {
+            var vec = new double[2];
+            var used = 0;
+
+            for (var x = 0; x < samples.Length; x++)
+            {
+                var distance = (x - center);
+                
+                if(distance > 10)
+                {
+                    continue;
+                }
+
+                var distanceSquared = distance * distance;
+                
+                if(distanceSquared == 0)
+                {
+                    continue;
+                }
+
+                var sample = samples[x];
+
+                if(sample == peak)
+                {
+                    continue;
+                }
+                
+                var sigmaSample = GaussianSigmaFromSample(peak, distanceSquared, sample);
+                var peakSample = GaussianPeakFromSample(distanceSquared, sigma, sample);
+
+                var sChange = GaussianSigmaErrorSlopeFunction(distanceSquared, peak, sigmaSample, sigma);
+                var pChange = GaussianPeakErrorSlopeFunction(peakSample, peak, sigma);
+
+                if (double.IsPositiveInfinity(sChange) || double.IsNegativeInfinity(sChange))
+                {
+                    throw new ArgumentException();
+                }
+
+                vec[0] += (-1 * sChange);
+                vec[1] += (-1 * pChange);
+
+                used++;
+            }
+
+            vec[0] /= used;
+            vec[1] /= used;
+
+            return vec;
+        }
+
         public static double GaussianFitError(double peak, double width, ushort[] pixels, int iWidth, int iHeight, StarInfo star, GaussianFitOptions options)
         {
             var samples = (options.Radius * 2.0) * (options.Radius * 2.0) - 1;

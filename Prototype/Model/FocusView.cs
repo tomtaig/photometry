@@ -6,7 +6,9 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
 using System;
-using static Prototype.Model.CaptureView;
+using Tests;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Prototype.Model
 {
@@ -20,8 +22,10 @@ namespace Prototype.Model
 
         public bool IsStarSelected { get; set; }
 
+        public bool UsePhdBackgroundFormula { get; set; } = false;
+        public bool UseMedianFilter { get; set; } = false;
+
         public Visibility SelectedStarIndicatorVisibility => IsStarSelected ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility StarSelectionPromptVisibility => !IsStarSelected ? Visibility.Visible : Visibility.Collapsed;
         public Visibility StarSelectionImageVisibility => IsStarSelected ? Visibility.Visible : Visibility.Collapsed;
         public Visibility StarSelectionStatsVisibility => IsStarSelected ? Visibility.Visible : Visibility.Hidden;
         public Visibility StarFittingGraphVisibility => IsStarSelected ? Visibility.Visible : Visibility.Hidden;
@@ -45,10 +49,10 @@ namespace Prototype.Model
         public bool IsSubFrameSelecting { get; set; }
         public double Boost { get; set; } = 1;
         public double BoostSlider { get; set; } = 1;
-        public double FittedOffset { get; set; } = 500;
-        public double FittedAmplitude { get; set; } = 45000;
-        public double FittedSigma { get; set; } = 1;
-        public double FittedCenter { get; set; } = 0;
+        public double FittedOffset { get; set; }
+        public double FittedAmplitude { get; set; }
+        public double FittedSigma { get; set; }
+        public double FittedCenter { get; set; }
         public int SubFrameX { get; set; }
         public int SubFrameY { get; set; }
         public int SubFrameWidth { get; set; }
@@ -61,42 +65,28 @@ namespace Prototype.Model
         public double SubFrameSelectAreaHeight { get; set; }
         public double Zoom { get; set; } = 1;
         public double ZoomSlider { get; set; } = 100;
+        public double ZoomedWidth { get; set; }
+        public double ZoomedHeight { get; set; }
         public double SubFrameSelectionThickness { get; set; }
         public bool IsSubFrameActive { get; set; }
         public ReticleType SelectedReticle { get; set; }
         public CaptureView Capture { get; set; }
-        public CaptureView CaptureROI { get; set; }
-        public double ZoomedWidth { get; set; }
-        public double ZoomedHeight { get; set; }
-        public int SelectedStarVisibleX { get; set; }
-        public int SelectedStarVisibleY { get; set; }
-        public int SelectedStarVisibleWidth { get; set; }
-        public int SelectedStarVisibleHeight { get; set; }
-        public double SelectedStarZoomedX { get; set; }
-        public double SelectedStarZoomedY { get; set; }
-        public double SelectedStarZoomedWidth { get; set; }
-        public double SelectedStarZoomedHeight { get; set; }
-        public double SelectedStarCenterX { get; set; }
-        public double SelectedStarCenterY { get; set; }
-        public double SelectedStarBrightestX { get; set; }
-        public double SelectedStarBrightestY { get; set; }
-        public int SelectedStarChipX1 { get; set; }
-        public int SelectedStarChipY1 { get; set; }
-        public int SelectedStarChipX2 { get; set; }
-        public int SelectedStarChipY2 { get; set; }
-        public double SelectedStarSNR { get; set; }
-        public ushort SelectedStarPeak { get; set; }
-        public double SelectedStarBackgroundMean { get; set; }
-        public double SelectedStarBackgroundSigma { get; set; }
-        public int SelectedStarSignalPixels { get; set; }
+        public RegionView Region { get; set; }
+        public StarView Star { get; set; }
 
         public Action FrameChanged { get; set; }
-        public Action RoiFrameChanged { get; set; }
+        public Action RegionChanged { get; set; }
 
         CameraView _camera;
 
         public FocusView()
-        {   
+        {
+            Region = new RegionView();
+
+            Region.RefreshZoom(Zoom);
+
+            Star = new StarView();
+
             var samples = new ObservableCollection<DataPoint>();
             
             ProfileSamples = samples;
@@ -160,20 +150,13 @@ namespace Prototype.Model
                 camera.SubFrameHeight * yratio);
         }
 
-        public void SetStarBackgroundMean(double background)
+        public void SetSelectedStar(StarView star)
         {
-            SelectedStarBackgroundMean = background;
+            Star = star;
 
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarBackgroundMean)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Star)));
         }
-
-        public void SetStarBackgroundSigma(double sigma)
-        {
-            SelectedStarBackgroundSigma = sigma;
-
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarBackgroundSigma)));
-        }
-
+        
         public void StartCapturing()
         {
             IsCapturing = true;
@@ -184,14 +167,7 @@ namespace Prototype.Model
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StopCaptureLoopVisibility)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StartCaptureLoopVisibility)));
         }
-
-        public void SetStarSignalPixels(int pixels)
-        {
-            SelectedStarSignalPixels = pixels;
-
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarSignalPixels)));
-        }
-
+        
         public void StopCapturing()
         {
             IsCapturing = false;
@@ -235,99 +211,49 @@ namespace Prototype.Model
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedReticle)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CrosshairReticleVisibility)));
         }
-
-        public void SetStarSNR(double snr)
-        {
-            SelectedStarSNR = snr;
-
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarSNR)));
-        }
-
-        public void SetStarPeak(ushort peak)
-        {
-            SelectedStarPeak = peak;
-
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarPeak)));
-        }
         
-        public void SetStarCenter(double x, double y)
-        {
-            SelectedStarCenterX = x;
-            SelectedStarCenterY = y;
-
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarCenterX)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarCenterY)));
-        }
-
-        public void SetStarBrightestCenter(double x, double y)
-        {
-            SelectedStarBrightestX = x;
-            SelectedStarBrightestY = y;
-
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarBrightestX)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarBrightestY)));
-        }
-
         public void SetCapture(CaptureView capture)
         {
-            Capture = capture;
+            Capture = capture;                       
 
-            var star1 = capture.GetVisiblePositionFromChipPosition(SelectedStarChipX1, SelectedStarChipY1);
-            var star2 = capture.GetVisiblePositionFromChipPosition(SelectedStarChipX2, SelectedStarChipY2);
+            Region.SetParentCapture(capture);
+            
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Capture)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Region)));
+        }
 
-            SelectedStarVisibleX = star1.X;
-            SelectedStarVisibleY = star1.Y;
-            SelectedStarVisibleWidth = star2.X - star1.X;
-            SelectedStarVisibleHeight = star2.Y - star1.Y;
-
-            SetZoomedProperties();
-
-            var x2 = SelectedStarVisibleX + SelectedStarVisibleWidth;
-            var y2 = SelectedStarVisibleY + SelectedStarVisibleHeight;
-
-            var maxX = capture.GetWidth();
-            var maxY = capture.GetHeight();
-
-            if (SelectedStarVisibleX < 0 || SelectedStarVisibleY < 0 || x2 >= maxX || y2 >= maxY)
+        public void SetZoom(double? zoom)
+        {
+            if (zoom.HasValue)
             {
-                ClearStarSelection();
+                Zoom = zoom.Value;
+                ZoomSlider = Zoom * 100.0;
             }
             else
             {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarVisibleX)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarVisibleY)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarVisibleWidth)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarVisibleHeight)));
-                
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ZoomedWidth)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ZoomedHeight)));
+                Zoom = ZoomSlider / 100.0;
             }
 
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Capture)));
-        }
-
-        private void SetZoomedProperties()
-        {
-            SelectedStarZoomedX = SelectedStarVisibleX * Zoom;
-            SelectedStarZoomedY = SelectedStarVisibleY * Zoom;
-            SelectedStarZoomedWidth = SelectedStarVisibleWidth * Zoom;
-            SelectedStarZoomedHeight = SelectedStarVisibleHeight * Zoom;
+            Region.RefreshZoom(Zoom);
 
             ZoomedWidth = (Capture?.GetWidth() ?? 0) * Zoom;
             ZoomedHeight = (Capture?.GetHeight() ?? 0) * Zoom;
-
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarZoomedX)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarZoomedY)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarZoomedWidth)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarZoomedHeight)));
+            
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ZoomedWidth)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ZoomedHeight)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ZoomSlider)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Zoom)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ZoomSlider)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ZoomPercentage)));
         }
 
         public void ClearStarSelection()
         {
-            IsStarSelected = false;
+            Star.SetStarNotFound();
+            Region.ClearSelection();
 
+            IsStarSelected = false;
+            
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsStarSelected)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarIndicatorVisibility)));
 
@@ -335,7 +261,6 @@ namespace Prototype.Model
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StarFittingStatsVisibility)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StarFocusGraphVisibility)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StarSelectionImageVisibility)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StarSelectionPromptVisibility)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StarSelectionStatsVisibility)));
         }
 
@@ -345,57 +270,96 @@ namespace Prototype.Model
             {
                 return;
             }
-
-            var star1 = Capture.GetChipPositionFromVisiblePosition(x1, y1);
-            var star2 = Capture.GetChipPositionFromVisiblePosition(x2, y2);
-
-            SelectedStarChipX1 = star1.X;
-            SelectedStarChipY1 = star1.Y;
-        
-            SelectedStarChipX2 = star2.X;
-            SelectedStarChipY2 = star2.Y;
             
-            SelectedStarVisibleX = x1;
-            SelectedStarVisibleY = y1;
-
-            SelectedStarVisibleWidth = x2 - x1;
-            SelectedStarVisibleHeight = y2 - y1;
-
+            Region.SetPosition(x1, y1, x2, y2);
+            
             IsStarSelected = true;
 
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarVisibleX)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarVisibleY)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarVisibleWidth)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarVisibleHeight)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarChipX1)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarChipY1)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarChipX2)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarChipY2)));
-
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Region)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsStarSelected)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedStarIndicatorVisibility)));
-
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StarFittingGraphVisibility)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StarFittingStatsVisibility)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StarFocusGraphVisibility)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StarSelectionImageVisibility)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StarSelectionPromptVisibility)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(StarSelectionStatsVisibility)));
-
-            SetZoomedProperties();
         }
-        
+
+        GaussianFitOptions2 _fitOptions = GaussianFitOptions2.Default;
+
         public void SetProfileSamples(ushort[] samples)
         {
-            var latest = new ObservableCollection<DataPoint>();
+            var plotted = new ObservableCollection<DataPoint>();
+            var signals = new List<ushort>();
+            var start = 0;
+            var end = 39;
 
-            for (var i=0; i<40; i++)
+            //for (var i = 0; i < 40; i++)
+            //{
+            //    if (samples[i] > 0)
+            //    {
+            //        start = i;
+            //        break;
+            //    }
+            //}
+
+            //for (var i = 39; i >= 0; i--)
+            //{
+            //    if (samples[i] > 0)
+            //    {
+            //        end = i;
+            //        break;
+            //    }
+            //}
+
+            if(end - start <= 0)
             {
-                latest.Add(new DataPoint(i-20, samples[i]));
+                ProfileSamples.Clear();
+                return;
             }
 
-            ProfileSamples = latest;
+            samples = samples.Skip(start).Take(end - start).ToArray();
 
+            for (var i=0; i<end-start; i++)
+            {
+                plotted.Add(new DataPoint(i - ((end - start) / 2.0), samples[i]));
+            }
+
+            ProfileSamples = plotted;
+
+            var max = 0;
+            var center = 0.0;
+            var mass = 0.0;
+            
+            for (var i = 0; i < samples.Length; i++)
+            {
+                if (samples[i] > max) max = samples[i];
+
+                center += samples[i] * i;
+                mass += samples[i];
+            }
+
+            center /= mass;
+            
+            var result = Photometry2.FindGaussianPSF(samples, max, center, _fitOptions);
+
+            //if(result.Result != GaussianFitResult.Error)
+            //{
+            //    if (!double.IsNaN(result.Width))
+            //    {
+            //        _fitOptions.StartSigma = result.Width;
+            //    }
+            //}
+
+            FittedAmplitude = result.Peak;
+            FittedCenter = center - ((end - start) / 2.0);
+            FittedSigma = result.Width;
+            FittedOffset = 0;
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FittedAmplitude)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FittedCenter)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FittedSigma)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FittedOffset)));                        
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ProfileSamples)));
         }
 
@@ -470,23 +434,7 @@ namespace Prototype.Model
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Boost)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BoostSlider)));
         }
-
-        public void ZoomChange(double? zoom)
-        {
-            if (zoom.HasValue)
-            {
-                ZoomSlider = zoom.Value;
-            }
-
-            Zoom = (ZoomSlider / 100.0);
-
-            SetZoomedProperties();
-
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Zoom)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ZoomSlider)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ZoomPercentage)));
-        }
-
+        
         public string ZoomPercentage
         {
             get { return $"{(Zoom).ToString("P0", CultureInfo.InvariantCulture)}"; }

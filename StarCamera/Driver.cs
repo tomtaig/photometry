@@ -2,7 +2,7 @@
 // --------------------------------------------------------------------------------
 // TODO fill in this information for your driver, then remove this line!
 //
-// ASCOM Camera driver for AdvancedSimulator
+// ASCOM Camera driver for StarGen
 //
 // Description:	Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam 
 //				nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam 
@@ -39,30 +39,25 @@ using ASCOM.Utilities;
 using ASCOM.DeviceInterface;
 using System.Globalization;
 using System.Collections;
-using AForge.Video;
-using AForge.Video.DirectShow;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Windows.Media.Imaging;
-using System.Windows.Media;
+using Tests;
 
-namespace ASCOM.AdvancedSimulator
+namespace ASCOM.StarGen
 {
     //
-    // Your driver's DeviceID is ASCOM.AdvancedSimulator.Camera
+    // Your driver's DeviceID is ASCOM.StarGen.Camera
     //
-    // The Guid attribute sets the CLSID for ASCOM.AdvancedSimulator.Camera
+    // The Guid attribute sets the CLSID for ASCOM.StarGen.Camera
     // The ClassInterface/None addribute prevents an empty interface called
-    // _AdvancedSimulator from being created and used as the [default] interface
+    // _StarGen from being created and used as the [default] interface
     //
     // TODO Replace the not implemented exceptions with code to implement the function or
     // throw the appropriate ASCOM exception.
     //
 
     /// <summary>
-    /// ASCOM Camera Driver for AdvancedSimulator.
+    /// ASCOM Camera Driver for StarGen.
     /// </summary>
-    [Guid("ed2047c6-a421-4990-86ab-213f7ab0d4ca")]
+    [Guid("952dcf94-1a30-4700-b2f3-7f243c3ddf43")]
     [ClassInterface(ClassInterfaceType.None)]
     public class Camera : ICameraV2
     {
@@ -70,12 +65,12 @@ namespace ASCOM.AdvancedSimulator
         /// ASCOM DeviceID (COM ProgID) for this driver.
         /// The DeviceID is used by ASCOM applications to load the driver at runtime.
         /// </summary>
-        internal static string driverID = "VideoPlayerCameraSimulator";
+        internal static string driverID = "ASCOM.StarGen.Camera";
         // TODO Change the descriptive string for your driver then remove this line
         /// <summary>
         /// Driver description that displays in the ASCOM Chooser.
         /// </summary>
-        private static string driverDescription = "Video Player Camera Simulator";
+        private static string driverDescription = "ASCOM Camera Driver for StarGen.";
 
         internal static string comPortProfileName = "COM Port"; // Constants used for Profile persistence
         internal static string comPortDefault = "COM1";
@@ -104,15 +99,13 @@ namespace ASCOM.AdvancedSimulator
         /// </summary>
         internal static TraceLogger tl;
 
-        private FileVideoSource reader;
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="AdvancedSimulator"/> class.
+        /// Initializes a new instance of the <see cref="StarGen"/> class.
         /// Must be public for COM registration.
         /// </summary>
         public Camera()
         {
-            tl = new TraceLogger("", "AdvancedSimulator");
+            tl = new TraceLogger("", "StarGen");
             ReadProfile(); // Read device configuration from the ASCOM Profile store
 
             tl.LogMessage("Camera", "Starting initialisation");
@@ -120,114 +113,15 @@ namespace ASCOM.AdvancedSimulator
             connectedState = false; // Initialise connected to false
             utilities = new Util(); //Initialise util object
             astroUtilities = new AstroUtils(); // Initialise astro utilities object
-                                               //TODO: Implement your additional construction here
-
-            StartPlaying();
+            //TODO: Implement your additional construction here
 
             tl.LogMessage("Camera", "Completed initialisation");
+
+            _simulator = new PhotoSimulator(new Random());
+
+            _simulator.AddStars(1000, 60000, 2.12, 5, 40);
         }
 
-        int[,] buffer;
-
-        private void Reader_NewFrame(object sender, NewFrameEventArgs eventArgs)
-        {
-            if(buffer == null)
-            {
-                buffer = new int[ccdWidth, ccdHeight];
-            }
-
-            var bmp = eventArgs.Frame;
-            
-            if (!cameraImageReady)
-            {
-                CreateArray(bmp, ref buffer);
-
-                Array.Copy(buffer, cameraImageArray, buffer.Length);
-
-                cameraImageReady = true;
-            }
-        }
-
-        double gain = 1.0;
-
-        unsafe void CreateArray(Bitmap source, ref int[,] result)
-        {
-            var x1 = (source.Width - ccdWidth) / 2;
-            var x2 = source.Width - x1;
-            var y1 = (source.Height - ccdHeight) / 2;
-            var y2 = source.Height - y1;
-
-            var rect = new Rectangle(x1, y1, x2, y2);
-            var bmpData = source.LockBits(rect, ImageLockMode.ReadWrite, source.PixelFormat);
-            
-            byte* ptr = (byte*)bmpData.Scan0;
-             
-            var row = ptr;
-            var max = 0;
-
-            for (int y = 0; y < ccdHeight; y++)
-            {
-                for (int x = 0; x < ccdWidth; x++)
-                {
-                    var pixel = row + x * 3;
-
-                    var r = pixel[0];
-                    var g = pixel[1];
-                    var b = pixel[2];
-                    var v = (r + g + b);
-
-                    result[x, y] = (int)((r + g + b) * gain);
-
-                    max = v > max ? v : max;
-                }
-
-                row += bmpData.Stride;
-            }
-
-            gain = MaxADU / (double)max;
-        }
-
-        static byte[] BitmapToByteArray(Bitmap bitmap)
-        {
-            BitmapData bmpdata = null;
-
-            try
-            {
-                bmpdata = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-                int numbytes = bmpdata.Stride * bitmap.Height;
-                byte[] bytedata = new byte[numbytes];
-                IntPtr ptr = bmpdata.Scan0;
-
-                Marshal.Copy(ptr, bytedata, 0, numbytes);
-
-                return bytedata;
-            }
-            finally
-            {
-                if (bmpdata != null)
-                    bitmap.UnlockBits(bmpdata);
-            }
-
-        }
-
-        private void Reader_PlayingFinished(object sender, ReasonToFinishPlaying reason)
-        {
-            StartPlaying();
-        }
-
-        void StartPlaying()
-        {
-            if(reader != null)
-            {
-                reader.PlayingFinished -= Reader_PlayingFinished;
-                reader.NewFrame -= Reader_NewFrame;
-            }
-
-            reader = new FileVideoSource("d:\\src\\star.avi");
-            reader.PlayingFinished += Reader_PlayingFinished;
-            reader.NewFrame += Reader_NewFrame;
-            reader.Start();
-        }
 
         //
         // PUBLIC COM INTERFACE ICameraV2 IMPLEMENTATION
@@ -400,19 +294,21 @@ namespace ASCOM.AdvancedSimulator
 
         #region ICamera Implementation
 
-        private int ccdWidth = 800; // Constants to define the ccd pixel dimenstions
-        private int ccdHeight = 600;
+        private const int ccdWidth = 800; // Constants to define the ccd pixel dimenstions
+        private const int ccdHeight = 600;
         private const double pixelSize = 6.45; // Constant for the pixel physical dimension
 
-        private int cameraNumX = 800; // Initialise variables to hold values required for functionality tested by Conform
-        private int cameraNumY = 600;
+        private int cameraNumX = ccdWidth; // Initialise variables to hold values required for functionality tested by Conform
+        private int cameraNumY = ccdHeight;
         private int cameraStartX = 0;
         private int cameraStartY = 0;
         private DateTime exposureStart = DateTime.MinValue;
         private double cameraLastExposureDuration = 0.0;
         private bool cameraImageReady = false;
-        private int[,] cameraImageArray = new int[800,600];
+        private int[,] cameraImageArray;
         private object[,] cameraImageArrayVariant;
+
+        PhotoSimulator _simulator;
 
         public void AbortExposure()
         {
@@ -550,7 +446,6 @@ namespace ASCOM.AdvancedSimulator
         {
             get
             {
-                tl.LogMessage("CanSetCCDTemperature Get", false.ToString());
                 return false;
             }
         }
@@ -568,13 +463,10 @@ namespace ASCOM.AdvancedSimulator
         {
             get
             {
-                tl.LogMessage("CoolerOn Get Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("CoolerOn", false);
+                return false;
             }
             set
             {
-                tl.LogMessage("CoolerOn Set Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("CoolerOn", true);
             }
         }
 
@@ -582,8 +474,7 @@ namespace ASCOM.AdvancedSimulator
         {
             get
             {
-                tl.LogMessage("CoolerPower Get Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("CoolerPower", false);
+                return 0;
             }
         }
 
@@ -600,8 +491,7 @@ namespace ASCOM.AdvancedSimulator
         {
             get
             {
-                tl.LogMessage("ExposureMax Get Get", "Not implemented");
-                return 600;
+                return 1000;
             }
         }
 
@@ -609,8 +499,7 @@ namespace ASCOM.AdvancedSimulator
         {
             get
             {
-                tl.LogMessage("ExposureMin Get", "Not implemented");
-                return 0.0001;
+                return 0.01;
             }
         }
 
@@ -618,8 +507,7 @@ namespace ASCOM.AdvancedSimulator
         {
             get
             {
-                tl.LogMessage("ExposureResolution Get", "Not implemented");
-                return 0.01;
+                return 0.0001;
             }
         }
 
@@ -627,13 +515,10 @@ namespace ASCOM.AdvancedSimulator
         {
             get
             {
-                tl.LogMessage("FastReadout Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("FastReadout", false);
+                return false;
             }
             set
             {
-                tl.LogMessage("FastReadout Set", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("FastReadout", true);
             }
         }
 
@@ -641,8 +526,7 @@ namespace ASCOM.AdvancedSimulator
         {
             get
             {
-                tl.LogMessage("FullWellCapacity Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("FullWellCapacity", false);
+                return 1000;
             }
         }
 
@@ -650,13 +534,10 @@ namespace ASCOM.AdvancedSimulator
         {
             get
             {
-                tl.LogMessage("Gain Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("Gain", false);
+                return 0;
             }
             set
             {
-                tl.LogMessage("Gain Set", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("Gain", true);
             }
         }
 
@@ -672,7 +553,7 @@ namespace ASCOM.AdvancedSimulator
         {
             get
             {
-                return 0;
+                return 1;
             }
         }
 
@@ -680,8 +561,7 @@ namespace ASCOM.AdvancedSimulator
         {
             get
             {
-                tl.LogMessage("Gains Get", "Not implemented");
-                throw new ASCOM.PropertyNotImplementedException("Gains", true);
+                return new ArrayList();
             }
         }
 
@@ -712,7 +592,17 @@ namespace ASCOM.AdvancedSimulator
                     tl.LogMessage("ImageArray Get", "Throwing InvalidOperationException because of a call to ImageArray before the first image has been taken!");
                     throw new ASCOM.InvalidOperationException("Call to ImageArray before the first image has been taken!");
                 }
-                
+
+                cameraImageArray = new int[cameraNumX, cameraNumY];
+
+                for (var x = 0; x < cameraNumX; x++)
+                {
+                    for (var y = 0; y < cameraNumY; y++)
+                    {
+                        cameraImageArray[x, y] = (int)_simulator.ImageArray[y * cameraNumX + x];
+                    }
+                }
+
                 return cameraImageArray;
             }
         }
@@ -937,12 +827,12 @@ namespace ASCOM.AdvancedSimulator
             if (cameraNumY > ccdHeight) throw new InvalidValueException("StartExposure", cameraNumY.ToString(), ccdHeight.ToString());
             if (cameraStartX > ccdWidth) throw new InvalidValueException("StartExposure", cameraStartX.ToString(), ccdWidth.ToString());
             if (cameraStartY > ccdHeight) throw new InvalidValueException("StartExposure", cameraStartY.ToString(), ccdHeight.ToString());
-
+            
             cameraLastExposureDuration = Duration;
             exposureStart = DateTime.Now;
-            cameraImageReady = false;
-            //System.Threading.Thread.Sleep((int)Duration * 1000);  // Sleep for the duration to simulate exposure 
+            System.Threading.Thread.Sleep((int)Duration * 1000);  // Sleep for the duration to simulate exposure 
             tl.LogMessage("StartExposure", Duration.ToString() + " " + Light.ToString());
+            cameraImageReady = true;
         }
 
         public int StartX

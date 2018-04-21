@@ -118,6 +118,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Model\ImageView.cs" />
+    <Compile Include="Model\RegionView.cs" />
+    <Compile Include="Model\StarView.cs" />
+    <Compile Include="Model\SubFrame.cs" />
     <Compile Include="Stretch.xaml.cs">
       <DependentUpon>Stretch.xaml</DependentUpon>
     </Compile>

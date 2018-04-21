@@ -90,6 +90,7 @@
     <Compile Include="FitStarTest.cs" />
     <Compile Include="FitStarTestResult.cs" />
     <Compile Include="FittingTests.cs" />
+    <Compile Include="Photometry2Tests.cs" />
     <Compile Include="PhotoSimulator.cs" />
     <Compile Include="PhotometryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
